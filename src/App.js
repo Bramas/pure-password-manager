@@ -67,7 +67,7 @@ class App extends Component {
     return (
       <div className={classes.root}>
         <Paper className={classes.paper}>
-          <Typography type="display1">Stateless Password Manager</Typography>
+          <Typography type="display1" style={{textAlign:'center'}}>Pure Password Manager</Typography>
           <br/>
           <FormControl
             className={classes.passphraseFormControl}>

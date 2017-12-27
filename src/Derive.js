@@ -52,9 +52,34 @@ const styles = theme => ({
     width: 200,
   },
   identicon: {
+    position: 'relative',
     margin: '40px auto',
     width: 320,
     height: 320,
+    display: 'block'
+  },
+  identiconHelpIcon: {
+    top: '3px',
+    right: '3px',
+    border: 'solid 1px #dddddd',
+    padding: '1px 4px',
+    position: 'absolute',
+    borderRadius: '31px',
+    background: 'white',
+    fontSize: '14px',
+    cursor: 'help'
+  },
+  identiconHelp: {
+    top: 0,
+    margin: '3px',
+    padding: '20px',
+    background: 'white',
+    border: 'solid 1px #dddddd',
+    position: 'absolute',
+    cursor: 'help'
+  },
+  loader: {
+    margin: '40px auto',
     display: 'block'
   }
 });
@@ -155,7 +180,9 @@ class Derive extends Component {
     if(!this.state.derivedKey)
     {
       if(this.state.working)
-        return <CircularProgress size={50} />;
+        return <CircularProgress
+          className={this.props.classes.loader}
+          size={50} />;
       return '';
     }
     var data = new Identicon(this.base64ToHex(this.state.derivedKey),
@@ -163,10 +190,26 @@ class Derive extends Component {
       size: 320,                                // 420px square
       format: 'svg'
     }).toString();
-    return <img
-      className={this.props.classes.identicon}
-      src={'data:image/svg+xml;base64,' + data}
-    />
+    return <div
+        className={this.props.classes.identicon}>
+        <img
+          width={320}
+          height={320}
+          src={'data:image/svg+xml;base64,' + data}
+        /><div className="identicon-help-hover">
+          <div
+          className={this.props.classes.identiconHelpIcon}>
+            ?
+          </div>
+          <div
+            className={'identicon-help '+this.props.classes.identiconHelp}>
+              {__('This image is a visual representation of '+
+                 'the generated password, you should familiarize'+
+                 ' with it so that you can detect quickly '+
+                 'if you mispelled your main password')}
+          </div>
+        </div>
+      </div>
   }
   showPassword()
   {

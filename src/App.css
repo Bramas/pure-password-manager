@@ -2,6 +2,13 @@ body {
   background: #F9F9F9;
 }
 
+.identicon-help {
+  display: none;
+}
+.identicon-help-hover:hover .identicon-help {
+  display: block;
+}
+
 .App {
   text-align: center;
 }
