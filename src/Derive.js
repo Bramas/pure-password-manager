@@ -17,6 +17,10 @@ import ContentCopy  from 'material-ui-icons/ContentCopy';
 import Button from 'material-ui/Button';
 import Done from 'material-ui-icons/Done';
 import __ from './locale';
+import { CircularProgress } from 'material-ui/Progress';
+
+import config from './config';
+
 var _ = require('lodash');
 
 const styles = theme => ({
@@ -43,62 +47,97 @@ const styles = theme => ({
   rightIcon: {
     marginLeft: theme.spacing.unit,
   },
+  formControl: {
+    margin: theme.spacing.unit,
+  },
 });
 class Derive extends Component {
   constructor() {
     super();
     this.state = {
-      workingPassphrase: '',
-      workingSalt: '',
+      passphrase: '',
+      salt: '',
       derivedKey: false,
       copied: false,
-      showPassword: false
+      showPassword: false,
+      working: false,
+      needToGenerateAgain: false
     }
-  }  
-  handleClickShowPasssword = () => {
+  }
+  handleClickShowPasssword()
+  {
     this.setState({ showPassword: !this.state.showPassword });
-  };
-  updateDerivedKey(passphrase, salt) {
-    if(!passphrase)
-      return;
-    this.setState({
-      workingPassphrase: passphrase, 
-      workingSalt:salt,
-      derivedKey: false
-    });    
-    setTimeout(() => {
-      if(this.state.workingPassphrase != passphrase
-      || this.state.workingSalt != salt
-    )
-      {
-        return;
-      }
-    //_.debounce(() => {
-      console.log('start');
-        scrypt(passphrase, salt, {
-          N: 16384,
-          r: 8,
-          p: 1,
-          dkLen: 64,
-          encoding: 'base64',
-          interruptStep : 1000
-      }, this.handleDerivedKey.bind(this, passphrase, salt))
-    }, 1000);
+  }
+  handleMouseDownPassword(e)
+  {
+    e.preventDefault();
   }
   componentWillReceiveProps(nextProps) {
     if(this.props.passphrase != nextProps.passphrase
     || this.props.salt != nextProps.salt)
     {
-      this.updateDerivedKey(nextProps.passphrase, nextProps.salt);
+      this.planUpdateDerivedKey(nextProps.passphrase, nextProps.salt);
     }
   }
   componentDidMount() {
     this.updateDerivedKey(this.props.passphrase, this.props.salt);
   }
+  planUpdateDerivedKey(passphrase, salt) {
+    //if(!passphrase)
+    //  return;
+    this.setState({
+      passphrase,
+      salt,
+      derivedKey: false
+    });
+    console.log('plan', passphrase);
+    if(this.state.working) {
+      console.log('canceled before timeout', passphrase);
+      return;
+    }
+    setTimeout(() => {
+      if(this.state.passphrase != passphrase
+        || this.state.salt != salt)
+      {
+        console.log('canceled after timeout', passphrase);
+        return;
+      }
+      this.updateDerivedKey(passphrase, salt)
+    }, config.keyGenerationDelay);
+  }
+  updateDerivedKey(passphrase, salt) {
+      if(!passphrase)
+      {
+        this.handleDerivedKey(passphrase, salt, '')
+        return;
+      }
+      this.setState({
+        working: true
+      });
+      console.log('++ start ', passphrase, salt);
+      scrypt(
+        passphrase,
+        salt,
+        config.scryptOptions,
+        this.handleDerivedKey.bind(this, passphrase, salt))
+
+  }
   handleDerivedKey(passphrase, salt, derivedKey) {
-    console.log('derived');
+    console.log('-- derived', passphrase, salt);
+    if(this.state.passphrase !== passphrase
+    || this.state.salt !== salt) {
+      console.log('restart');
+      this.updateDerivedKey(
+        this.state.passphrase,
+        this.state.salt);
+      return;
+    }
     derivedKey = derivedKey.replace(/\+|\//igm, '');
-    this.setState({derivedKey, copied: false});
+    this.setState({
+      derivedKey: derivedKey || false,
+      copied: false,
+      working: false
+    });
   }
   //https://gist.github.com/GeorgioWan/16a7ad2a255e8d5c7ed1aca3ab4aacec
   base64ToHex(str) {
@@ -108,42 +147,53 @@ class Derive extends Component {
   renderIdenticon() {
     if(!this.state.derivedKey)
     {
+      if(this.state.working)
+        return <CircularProgress size={50} />;
       return '';
     }
-    var data = new Identicon(this.base64ToHex(this.state.derivedKey), 
+    var data = new Identicon(this.base64ToHex(this.state.derivedKey),
     {
       size: 240,                                // 420px square
-      format: 'svg'  
+      format: 'svg'
     }).toString();
     return <img width={240} height={240} src={'data:image/svg+xml;base64,' + data} />
+  }
+  showPassword()
+  {
+    return this.state.derivedKey === false || this.state.showPassword;
   }
   render() {
     const { classes } = this.props;
     return (
       <div className="App">
-      <TextField
-        readOnly
-        id="derivedKey"
-        label={__('Generated password')}
-        className={classes.textField}
-        margin="normal" 
-        type={this.state.derivedKey === false ? 'text' : "password"}
-        value={this.state.derivedKey === false ? '' : this.state.derivedKey.substr(0,12)}
-        endAdornment={
-          <InputAdornment position="end">
-            <IconButton
-              onClick={this.handleClickShowPasssword}
-              onMouseDown={this.handleMouseDownPassword}
-            >
-              {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        }
-      />
+        <FormControl
+          className={classes.formControl}>
+          <InputLabel htmlFor="derivedKey">{__('Generated password')}</InputLabel>
+          <Input
+            id="derivedKey"
+            readOnly
+            disabled={this.state.derivedKey === false}
+            type={this.showPassword() ? 'text' : "password"}
+            value={this.state.derivedKey === false ? '' : this.state.derivedKey.substr(0,12)}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={this.handleClickShowPasssword.bind(this)}
+                  onMouseDown={this.handleMouseDownPassword.bind(this)}
+                >
+                  {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        </FormControl>
         <CopyToClipboard text={this.state.derivedKey === false ? false : this.state.derivedKey.substr(0,12)}
           onCopy={() => this.setState({copied: true})}>
-          <Button raised color="primary" className={classes.button} >
-            {this.state.copied ? 
+          <Button
+            disabled={this.state.derivedKey === false}
+            raised color="primary"
+            className={classes.button} >
+            {this.state.copied ?
               <Done className={classes.leftIcon} /> :
               <ContentCopy className={classes.leftIcon} />}
             {this.state.copied ? __('Copied') : __('Copy')}
@@ -152,7 +202,7 @@ class Derive extends Component {
         <br/>
         {this.renderIdenticon()}
       </div>
-      
+
     );
   }
 }
