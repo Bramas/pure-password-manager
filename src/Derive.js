@@ -49,7 +49,14 @@ const styles = theme => ({
   },
   formControl: {
     margin: theme.spacing.unit,
+    width: 200,
   },
+  identicon: {
+    margin: '40px auto',
+    width: 320,
+    height: 320,
+    display: 'block'
+  }
 });
 class Derive extends Component {
   constructor() {
@@ -153,10 +160,13 @@ class Derive extends Component {
     }
     var data = new Identicon(this.base64ToHex(this.state.derivedKey),
     {
-      size: 240,                                // 420px square
+      size: 320,                                // 420px square
       format: 'svg'
     }).toString();
-    return <img width={240} height={240} src={'data:image/svg+xml;base64,' + data} />
+    return <img
+      className={this.props.classes.identicon}
+      src={'data:image/svg+xml;base64,' + data}
+    />
   }
   showPassword()
   {
@@ -165,7 +175,7 @@ class Derive extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <div className="App">
+      <span className="derivedKey">
         <FormControl
           className={classes.formControl}>
           <InputLabel htmlFor="derivedKey">{__('Generated password')}</InputLabel>
@@ -201,7 +211,7 @@ class Derive extends Component {
         </CopyToClipboard>
         <br/>
         {this.renderIdenticon()}
-      </div>
+      </span>
 
     );
   }

@@ -9,6 +9,11 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
+import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import IconButton from 'material-ui/IconButton';
+import Visibility from 'material-ui-icons/Visibility';
+import VisibilityOff from 'material-ui-icons/VisibilityOff';
 
 import __ from './locale';
 
@@ -18,14 +23,20 @@ const styles = theme => ({
     marginTop: 30,
   },
   paper: {
-    padding: 16,
-    textAlign: 'center',
+    padding: 25,
+    textAlign: 'left',
+    margin: 'auto',
+    width: '450px',
     color: theme.palette.text.secondary,
   },
   textField: {
-    marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
     width: 200,
+  },
+  passphraseFormControl: {
+    marginLeft: '40px',
+    marginRight: theme.spacing.unit,
+    width: 400,
   },
 });
 
@@ -43,54 +54,64 @@ class App extends Component {
   updateSalt(e) {
     this.setState({salt: e.target.value});
   }
+  handleClickShowPasssword()
+  {
+    this.setState({ showPassword: !this.state.showPassword });
+  }
+  handleMouseDownPassword(e)
+  {
+    e.preventDefault();
+  }
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
-      <Grid container spacing={24}>
-        <Grid item xs={1}></Grid>
-        <Grid item xs={10}>
-          
-          <Paper className={classes.paper}>
+        <Paper className={classes.paper}>
           <Typography type="display1">Stateless Password Manager</Typography>
-          <TextField
-              id="password"
-              label={__('Main password')}
-              className={classes.textField}
-              margin="normal" 
-               type="password"
-              value={this.state.passphrase}
+          <br/>
+          <FormControl
+            className={classes.passphraseFormControl}>
+            <InputLabel htmlFor="passphrase">
+              {__('Main password')}
+            </InputLabel>
+            <Input
+              id="passphrase"
               onChange={this.updatePassphrase.bind(this)}
+              type={this.state.showPassword ? 'text' : "password"}
+              value={this.state.passphrase}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={this.handleClickShowPasssword.bind(this)}
+                    onMouseDown={this.handleMouseDownPassword.bind(this)}
+                  >
+                    {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
             />
-            <TextField
-              id="salt"
-              label={__('Web site')}
-              className={classes.textField}
-              margin="normal" 
-              value={this.state.salt}
-              onChange={this.updateSalt.bind(this)}
-            />
-            <br/>
-            <br/>
-            <Derive salt={this.state.salt} passphrase={this.state.passphrase} />
-          </Paper>
-        </Grid>
-        <Grid item xs={1}></Grid>
-        </Grid>
-        
-        <Grid container spacing={24}>
-          <Grid item xs={1}></Grid>
-          <Grid item xs={10}>
-          <Paper className={classes.paper}>
-            <Typography type="paragraph">How does it work? </Typography>
-            <Typography type="paragraph">The main password is hashed with scrypt using the destination
-          website as a salt. The first 12 alphanumeric characters of the base64 encoded hashed value
-          is the generated password.
-          </Typography></Paper>
-          </Grid>
-          <Grid item xs={1}></Grid>
-          </Grid>
-        </div>
+          </FormControl>
+          <br/>
+          <span style={{fontSize:'40px'}}>+ </span><TextField
+            id="salt"
+            label={__('Application or Website')}
+            className={classes.textField}
+            margin="normal"
+            value={this.state.salt}
+            onChange={this.updateSalt.bind(this)}
+          />
+          <br/>
+          <br/>
+          <span style={{fontSize:'40px'}}>= </span><Derive salt={this.state.salt} passphrase={this.state.passphrase} />
+        </Paper>
+        <Paper className={classes.paper}>
+          <Typography type="caption">How does it work? </Typography>
+          <Typography type="caption">The main password is hashed with scrypt using the destination
+            website as salt. The first 12 alphanumeric characters of the base64 encoded hashed value
+            is the generated password.
+          </Typography>
+        </Paper>
+      </div>
     );
   }
 }
@@ -100,4 +121,3 @@ App.propTypes = {
 };
 
 export default withStyles(styles)(App);
-
