@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "repository": "https://github.com/Bramas/stateless-password-manager.git",
+  "homepage": "https://bramas.github.io/stateless-password-manager/",
   "dependencies": {
     "i18n": "^0.8.3",
     "identicon.js": "^2.3.1",
