@@ -12,3 +12,6 @@ Quentin Bramas <bramas@unistra.fr>
 
 ### Licence
 MIT
+
+### Donation
+ETH: 0x1Bcae562115A3bE1336FE2761647BBf0Ceb9574a
