@@ -113,7 +113,8 @@ class App extends Component {
           <Typography type="caption">How does it work? </Typography>
           <Typography type="caption">The main password is hashed with scrypt using the destination
             website as salt. The first 12 alphanumeric characters of the base64 encoded hashed value
-            is the generated password.
+            is the generated password.<br/>
+            If you like it, I accept donation in Ether at this address: 0x1Bcae562115A3bE1336FE2761647BBf0Ceb9574a
           </Typography>
         </Paper>
       </div>
