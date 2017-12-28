@@ -4,13 +4,10 @@ import scrypt from 'scrypt-async';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import Identicon from 'identicon.js';
 import PropTypes from 'prop-types';
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import { FormControl } from 'material-ui/Form';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import ContentCopy  from 'material-ui-icons/ContentCopy';
@@ -20,8 +17,6 @@ import __ from './locale';
 import { CircularProgress } from 'material-ui/Progress';
 
 import config from './config';
-
-var _ = require('lodash');
 
 const styles = theme => ({
   root: {
@@ -105,8 +100,8 @@ class Derive extends Component {
     e.preventDefault();
   }
   componentWillReceiveProps(nextProps) {
-    if(this.props.passphrase != nextProps.passphrase
-    || this.props.salt != nextProps.salt)
+    if(this.props.passphrase !== nextProps.passphrase
+    || this.props.salt !== nextProps.salt)
     {
       this.planUpdateDerivedKey(nextProps.passphrase, nextProps.salt);
     }
@@ -122,16 +117,13 @@ class Derive extends Component {
       salt,
       derivedKey: false
     });
-    console.log('plan', passphrase);
     if(this.state.working) {
-      console.log('canceled before timeout', passphrase);
       return;
     }
     setTimeout(() => {
-      if(this.state.passphrase != passphrase
-        || this.state.salt != salt)
+      if(this.state.passphrase !== passphrase
+        || this.state.salt !== salt)
       {
-        console.log('canceled after timeout', passphrase);
         return;
       }
       this.updateDerivedKey(passphrase, salt)
@@ -146,7 +138,6 @@ class Derive extends Component {
       this.setState({
         working: true
       });
-      console.log('++ start ', passphrase, salt);
       scrypt(
         passphrase,
         salt,
@@ -155,10 +146,8 @@ class Derive extends Component {
 
   }
   handleDerivedKey(passphrase, salt, derivedKey) {
-    console.log('-- derived', passphrase, salt);
     if(this.state.passphrase !== passphrase
     || this.state.salt !== salt) {
-      console.log('restart');
       this.updateDerivedKey(
         this.state.passphrase,
         this.state.salt);
@@ -193,6 +182,7 @@ class Derive extends Component {
     return <div
         className={this.props.classes.identicon}>
         <img
+          alt="identicon"
           width={320}
           height={320}
           src={'data:image/svg+xml;base64,' + data}

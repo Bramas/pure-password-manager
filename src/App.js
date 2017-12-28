@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import PropTypes from 'prop-types';
 import Derive from './Derive';
-import scrypt from 'scrypt-async';
 import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
+import parse from 'url-parse';
 
 import __ from './locale';
 
@@ -43,9 +41,16 @@ const styles = theme => ({
 class App extends Component {
   constructor() {
     super();
+
+    let url = parse(window.location, true);
+    let app = url.query.app || '';
+    if(!app && url.query.url) {
+      url = parse(url.query.url, true);
+      app = url.hostname.split('.').slice(-2)[0];
+    }
     this.state = {
       passphrase: '',
-      salt: ''
+      salt: app
     }
   }
   updatePassphrase(e) {

@@ -5,9 +5,19 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import blueGrey from 'material-ui/colors/blueGrey';
+import deepPurple from 'material-ui/colors/deepPurple';
 
+const theme = createMuiTheme({
+  palette: {
+    primary: blueGrey,
+    secondary: deepPurple,
+  },
+  status: {
+    danger: 'orange',
+  },
+});
 
-const theme = createMuiTheme();
 
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
