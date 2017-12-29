@@ -17,6 +17,7 @@ import __ from './locale';
 import { CircularProgress } from 'material-ui/Progress';
 
 import config from './config';
+import shajs from 'sha.js';
 
 const styles = theme => ({
   root: {
@@ -174,11 +175,13 @@ class Derive extends Component {
           size={50} />;
       return '';
     }
-    var data = new Identicon(this.base64ToHex(this.state.derivedKey),
-    {
-      size: 320,                                // 420px square
-      format: 'svg'
-    }).toString();
+    var data = new Identicon(
+      shajs('sha256').update(this.state.passphrase).digest('hex'),
+      {
+        size: 320,                                // 420px square
+        format: 'svg'
+      }
+    ).toString();
     return <div
         className={this.props.classes.identicon}>
         <img
