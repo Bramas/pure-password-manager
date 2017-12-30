@@ -9,6 +9,5 @@ export default {
     dkLen: 64,
     encoding: 'base64',
     interruptStep : 100
-  },
-  scryptSaltPrefix: 'pure-salt|'
+  }
 }
