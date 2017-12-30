@@ -10,7 +10,6 @@ export default {
     encoding: 'base64',
     interruptStep : 100
   },
-  scryptSaltPrefix: 'pure-salt|',
   scryptFormatHashOptions:{
     N: 16384,
     r: 8,
