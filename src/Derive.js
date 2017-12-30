@@ -14,6 +14,7 @@ import ContentCopy  from 'material-ui-icons/ContentCopy';
 import Button from 'material-ui/Button';
 import Done from 'material-ui-icons/Done';
 import __ from './locale';
+import Format from './Format';
 import { CircularProgress } from 'material-ui/Progress';
 
 import config from './config';
@@ -245,6 +246,13 @@ class Derive extends Component {
             {this.state.copied ? __('Copied') : __('Copy')}
           </Button>
         </CopyToClipboard>
+        <br/>
+        {this.state.derivedKey === false ?
+          '' :
+          <Format
+            passwordHash={this.state.derivedKey}
+            application={this.state.salt}/>
+        }
         <br/>
         {this.renderIdenticon()}
       </span>
