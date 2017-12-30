@@ -142,7 +142,7 @@ class Derive extends Component {
       });
       scrypt(
         passphrase,
-        salt,
+        config.scryptSaltPrefix + salt,
         config.scryptOptions,
         this.handleDerivedKey.bind(this, passphrase, salt))
 
