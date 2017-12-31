@@ -1,6 +1,7 @@
 
 
 export default {
+  etherNetwork: 'ropsten', // 'ropsten': testnet, 'mainnet': production net
   keyGenerationDelay: 200,
   scryptOptions: {
     N: 16384,
@@ -19,6 +20,8 @@ export default {
     interruptStep : 100
   },
   scryptFormatHashSaltPrefix : 'pure-formatHash-salt|',
+
+  //ropsten testnet contract address
   contractAddress: "0x1058E0EB52dA0d5FdCEd7b357670Ba06eC95aF91",
   contractABI: [
     {

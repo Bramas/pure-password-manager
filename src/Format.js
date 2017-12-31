@@ -20,21 +20,26 @@ class Format extends Component {
   constructor() {
     super();
     this.state = {
-      privateAccountAvailable: false,
       format: ''
     };
   }
   toAscii(input) {
     return this.web3.toAscii(input).replace(/\u0000/g, '')
   }
+  isPrivate() {
+    return this.web3.isAddress(this.web3.eth.defaultAccount);
+  }
+  isMetaMask() {
+    return this.web3.currentProvider.isMetaMask === true;
+  }
   componentWillMount() {
     if (typeof window.web3 === 'undefined') {
-      this.web3 = require('web3');
+      const Web3 = require('web3');
+      const INFURA_API_KEY = require('./INFURA_API_KEY');
+      // API key are freely available at infura.io
+      this.web3 = new Web3(new Web3.providers.HttpProvider('https://'+config.etherNetwork+'.infura.io/'+INFURA_API_KEY));
     }else {
       this.web3 = window.web3;
-      this.setState({
-        privateAccountAvailable: true
-      });
     }
     var passwordFormatContract = this.web3.eth.contract(config.contractABI);
     this.contractInstance = passwordFormatContract.at(config.contractAddress);
@@ -117,10 +122,28 @@ class Format extends Component {
         value={this.state.format ? this.state.format : ''}
         onChange={this.updateFormat.bind(this)}
       />
-      {this.state.privateAccountAvailable ?
-        <Button onClick={this.saveFormat.bind(this)}>Save in the Blockchain</Button>
-      : ''}
-      {this.state.txHash ? this.state.txHash : ''}
+      {this.isPrivate() ?
+        <span><Button raised onClick={this.saveFormat.bind(this)}>Save in the Blockchain</Button>
+          <br/>
+          This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
+          so that every time you enter your passphrase with this website, the given format will be used.
+        </span>
+      : (this.isMetaMask() ?
+        <span>
+          <br/>
+          Unlock MetaMask to save the format in the blockchain
+        </span>
+        :
+        <span><br/>
+          You'll have to remember the format for the next
+          time you'll have to enter this password, or you can
+          save it to the ethereum blockchain. To do so you can
+          you can install <a href="https://metamask.io/">MetaMask</a>
+          to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
+        </span>
+      )}
+      {this.state.txHash ?
+        <div>Transaction hash : <a href={"https://"+config.etherNetwork+".etherscan.io/tx/"+this.state.txHash}>{this.state.txHash}</a></div> : ''}
     </div>
   }
 }

@@ -15,6 +15,8 @@ import Done from 'material-ui-icons/Done';
 import __ from './locale';
 import Format from './Format';
 import { CircularProgress } from 'material-ui/Progress';
+import DebounceComponent from './DebounceComponent';
+import { LinearProgress } from 'material-ui/Progress';
 
 import config from './config';
 import shajs from 'sha.js';
@@ -52,13 +54,12 @@ const styles = theme => ({
     display: 'block'
   }
 });
+
+
 class Derive extends Component {
   constructor() {
     super();
     this.state = {
-      passphrase: '',
-      salt: '',
-      derivedKey: false,
       copied: false,
       showPassword: false,
       working: false,
@@ -73,67 +74,6 @@ class Derive extends Component {
   {
     e.preventDefault();
   }
-  componentWillReceiveProps(nextProps) {
-    if(this.props.passphrase !== nextProps.passphrase
-    || this.props.salt !== nextProps.salt)
-    {
-      this.planUpdateDerivedKey(nextProps.passphrase, nextProps.salt);
-    }
-  }
-  componentDidMount() {
-    this.updateDerivedKey(this.props.passphrase, this.props.salt);
-  }
-  planUpdateDerivedKey(passphrase, salt) {
-    //if(!passphrase)
-    //  return;
-    this.setState({
-      passphrase,
-      salt,
-      derivedKey: false
-    });
-    if(this.state.working) {
-      return;
-    }
-    setTimeout(() => {
-      if(this.state.passphrase !== passphrase
-        || this.state.salt !== salt)
-      {
-        return;
-      }
-      this.updateDerivedKey(passphrase, salt)
-    }, config.keyGenerationDelay);
-  }
-  updateDerivedKey(passphrase, salt) {
-      if(!passphrase)
-      {
-        this.handleDerivedKey(passphrase, salt, '')
-        return;
-      }
-      this.setState({
-        working: true
-      });
-      scrypt(
-        passphrase,
-        salt,
-        config.scryptOptions,
-        this.handleDerivedKey.bind(this, passphrase, salt))
-
-  }
-  handleDerivedKey(passphrase, salt, derivedKey) {
-    if(this.state.passphrase !== passphrase
-    || this.state.salt !== salt) {
-      this.updateDerivedKey(
-        this.state.passphrase,
-        this.state.salt);
-      return;
-    }
-    derivedKey = derivedKey.replace(/\+|\//igm, '');
-    this.setState({
-      derivedKey: derivedKey || false,
-      copied: false,
-      working: false
-    });
-  }
   //https://gist.github.com/GeorgioWan/16a7ad2a255e8d5c7ed1aca3ab4aacec
   base64ToHex(str) {
     var hexString = new Buffer(str, 'base64').toString('hex');
@@ -141,7 +81,7 @@ class Derive extends Component {
   }
   showPassword()
   {
-    return this.state.derivedKey === false || this.state.showPassword;
+    return this.props.result === null || this.state.showPassword;
   }
   render() {
     const { classes } = this.props;
@@ -149,13 +89,14 @@ class Derive extends Component {
       <span className="derivedKey">
         <FormControl
           className={classes.formControl}>
-          <InputLabel htmlFor="derivedKey">{__('Generated password')}</InputLabel>
+          <InputLabel htmlFor="derivedKey">
+            {this.props.working ? __('Generating password') : __('Generated password')}</InputLabel>
           <Input
             id="derivedKey"
             readOnly
-            disabled={this.state.derivedKey === false}
+            disabled={this.props.working || !this.props.result}
             type={this.showPassword() ? 'text' : "password"}
-            value={this.state.derivedKey === false ? '' : this.state.derivedKey.substr(0,12)}
+            value={this.props.result === null || this.props.working? '' : this.props.result.substr(0,12)}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -167,11 +108,12 @@ class Derive extends Component {
               </InputAdornment>
             }
           />
+          {this.props.working ? <LinearProgress style={{height:2}} color="accent" /> : null}
         </FormControl>
-        <CopyToClipboard text={this.state.derivedKey === false ? false : this.state.derivedKey.substr(0,12)}
+        <CopyToClipboard text={this.props.result === null ? null : this.props.result.substr(0,12)}
           onCopy={() => this.setState({copied: true})}>
           <Button
-            disabled={this.state.derivedKey === false}
+            disabled={this.props.result === null}
             raised color="primary"
             className={classes.button} >
             {this.state.copied ?
@@ -181,11 +123,11 @@ class Derive extends Component {
           </Button>
         </CopyToClipboard>
         <br/>
-        {this.state.derivedKey === false ?
-          '' :
+        {this.props.result && this.props.values ?
           <Format
-            passwordHash={this.state.derivedKey}
-            application={this.state.salt}/>
+            passwordHash={this.props.result}
+            application={this.props.values.application}/>
+            : ''
         }
       </span>
 
@@ -198,4 +140,27 @@ Derive.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Derive);
+const Debounce = ({passphrase, application}) =>
+<DebounceComponent
+  delay={100}
+  component={withStyles(styles)(Derive)}
+  values={{passphrase, application}}
+  compute={
+    (values) => {
+      return new Promise((acc, rej) => {
+        if(!values.passphrase) {
+          acc('');
+        }
+        scrypt(
+          values.passphrase,
+          values.application,
+          config.scryptOptions,
+          (key) => {
+            key = key.replace(/\+|\//igm, '');
+            acc(key);
+          })
+      })
+    }
+  } />
+
+export default Debounce;

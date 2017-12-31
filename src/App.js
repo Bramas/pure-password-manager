@@ -31,7 +31,8 @@ const styles = theme => ({
     color: theme.palette.text.secondary,
   },
   textField: {
-    marginRight: theme.spacing.unit,
+    marginTop: 20,
+    marginLeft: 7,
     width: 200,
   },
   passphraseFormControl: {
@@ -153,6 +154,7 @@ class App extends Component {
               {__('Main password')}
             </InputLabel>
             <Input
+              inputProps={{tabIndex:1}}
               id="passphrase"
               onChange={this.updatePassphrase.bind(this)}
               type={this.state.showPassword ? 'text' : "password"}
@@ -171,18 +173,24 @@ class App extends Component {
           </FormControl>
           {this.renderIdenticon()}
           <br/>
-          <span style={{fontSize:'40px'}}>+ </span><TextField
-            id="salt"
-            label={__('Application or Website')}
-            className={classes.textField}
-            margin="normal"
-            value={this.state.salt}
-            onChange={this.updateSalt.bind(this)}
-          />
+          <span style={{fontSize:'40px'}}>+ </span>
+          <FormControl
+            className={classes.textField}>
+            <InputLabel htmlFor="salt">
+              {__('Application or Website')}
+            </InputLabel>
+            <Input
+              inputProps={{tabIndex:2}}
+              id="salt"
+              margin="normal"
+              value={this.state.salt}
+              onChange={this.updateSalt.bind(this)}
+            />
+          </FormControl>
           <br/>
           <br/>
           <span style={{fontSize:'40px'}}>= </span>
-          <Derive salt={this.state.salt} passphrase={this.state.passphrase} />
+          <Derive application={this.state.salt} passphrase={this.state.passphrase} />
         </Paper>
         <Paper className={classes.paper}>
           <Typography type="caption">How does it work? </Typography>
