@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import scrypt from 'scrypt-async';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import Identicon from 'identicon.js';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
@@ -47,33 +46,6 @@ const styles = theme => ({
   formControl: {
     margin: theme.spacing.unit,
     width: 200,
-  },
-  identicon: {
-    position: 'relative',
-    margin: '40px auto',
-    width: 320,
-    height: 320,
-    display: 'block'
-  },
-  identiconHelpIcon: {
-    top: '3px',
-    right: '3px',
-    border: 'solid 1px #dddddd',
-    padding: '1px 4px',
-    position: 'absolute',
-    borderRadius: '31px',
-    background: 'white',
-    fontSize: '14px',
-    cursor: 'help'
-  },
-  identiconHelp: {
-    top: 0,
-    margin: '3px',
-    padding: '20px',
-    background: 'white',
-    border: 'solid 1px #dddddd',
-    position: 'absolute',
-    cursor: 'help'
   },
   loader: {
     margin: '40px auto',
@@ -167,44 +139,6 @@ class Derive extends Component {
     var hexString = new Buffer(str, 'base64').toString('hex');
     return hexString;
   }
-  renderIdenticon() {
-    if(!this.state.derivedKey)
-    {
-      if(this.state.working)
-        return <CircularProgress
-          className={this.props.classes.loader}
-          size={50} />;
-      return '';
-    }
-    var data = new Identicon(
-      shajs('sha256').update(this.state.passphrase).digest('hex'),
-      {
-        size: 320,                                // 420px square
-        format: 'svg'
-      }
-    ).toString();
-    return <div
-        className={this.props.classes.identicon}>
-        <img
-          alt="identicon"
-          width={320}
-          height={320}
-          src={'data:image/svg+xml;base64,' + data}
-        /><div className="identicon-help-hover">
-          <div
-          className={this.props.classes.identiconHelpIcon}>
-            ?
-          </div>
-          <div
-            className={'identicon-help '+this.props.classes.identiconHelp}>
-              {__('This image is a visual representation of '+
-                 'the generated password, you should familiarize'+
-                 ' with it so that you can detect quickly '+
-                 'if you mispelled your main password')}
-          </div>
-        </div>
-      </div>
-  }
   showPassword()
   {
     return this.state.derivedKey === false || this.state.showPassword;
@@ -253,8 +187,6 @@ class Derive extends Component {
             passwordHash={this.state.derivedKey}
             application={this.state.salt}/>
         }
-        <br/>
-        {this.renderIdenticon()}
       </span>
 
     );
