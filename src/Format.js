@@ -6,7 +6,9 @@ import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
+
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
+import Checkbox from 'material-ui/Checkbox';
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
 import scrypt from 'scrypt-async';
@@ -114,6 +116,16 @@ class Format extends Component {
   }
   render() {
     return <div>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={this.state.checkedA}
+            onChange={this.handleChange('checkedA')}
+            value="checkedA"
+          />
+        }
+        label="Option A"
+      />
       <TextField
         id="format"
         label={__('Format')}
