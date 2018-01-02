@@ -141,25 +141,29 @@ Derive.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-const D = ({values, result}) => values ? <Format
-  passwordHash={result}
-  application={values.application}
-  /> : '';
+class D extends Component {
+  render()
+  {
+    const {passphrase, application, result, working} = this.props;
+    if(!application && !passphrase) return '';
+    
+    return <Format
+        passwordHash={result}
+        application={application}
+      />;
+  }
+}
 
-const Debounce = ({passphrase, application}) =>
-<DebounceComponent
-  delay={100}
-  component={D}
-  values={{passphrase, application}}
-  compute={
-    (values) => {
+export default DebounceComponent({
+  delay:100,
+  compute: ({passphrase, application}) => {
       return new Promise((acc, rej) => {
-        if(!values.passphrase) {
+        if(!passphrase) {
           acc('');
         }
         scrypt(
-          values.passphrase,
-          values.application,
+          passphrase,
+          application,
           config.scryptOptions,
           (key) => {
             key = key.replace(/\+|\//igm, '');
@@ -167,6 +171,4 @@ const Debounce = ({passphrase, application}) =>
           })
       })
     }
-  } />
-
-export default Debounce;
+  })(D);

@@ -6,8 +6,12 @@ import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
+import Visibility from 'material-ui-icons/Visibility';
+import VisibilityOff from 'material-ui-icons/VisibilityOff';
+import ContentCopy  from 'material-ui-icons/ContentCopy';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { FormGroup, FormControlLabel, FormControl } from 'material-ui/Form';
+import { CircularProgress } from 'material-ui/Progress';
 import Checkbox from 'material-ui/Checkbox';
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
@@ -24,6 +28,7 @@ import ShuffleIcon from 'material-ui-icons/Shuffle';
 import TuneIcon from 'material-ui-icons/Tune';
 import ForwardIcon from 'material-ui-icons/Forward';
 import TranslateIcon from 'material-ui-icons/Translate';
+import DoneIcon from 'material-ui-icons/Done';
 import 'rc-slider/assets/index.css';
 
 
@@ -42,19 +47,27 @@ function toAscii(hex) {
   return str;
 }
 
+const defaultState = {
+  length: 12,
+  digits: true,
+  lowercase: true,
+  uppercase: true,
+  specialchar: false,
+  nonce: 0,
+  startsWith: '',
+  editFormat: false,
+  allowConsecutive: true,
+  allowDuplicates: true,
+};
+
 class Format extends Component {
   constructor() {
     super();
-    this.state = {
-      length: 12,
-      digits: true,
-      lowercase: true,
-      uppercase: true,
-      specialchar: false,
-      nonce: 0,
-      startsWith: '',
-      editFormat: false
-    };
+    this.state = Object.assign(
+      {},
+      defaultState,
+      {showPassword:false, copied: false}
+    );
   }
   isPrivate() {
     return Eth.web3.isAddress(Eth.web3.eth.defaultAccount);
@@ -64,6 +77,11 @@ class Format extends Component {
   }
   componentWillMount() {
     Eth.init();
+  }
+  componentWillReceiveProps(nextProps) {
+    if(nextProps.passwordHash !== this.props.passwordHash) {
+      this.setState(Object.assign({}, defaultState));
+    }
   }
   saveFormat()
   {
@@ -98,6 +116,9 @@ class Format extends Component {
   updateFormat(e) {
     this.setState({format: e.target.value});
   }
+  changeFormat(o) {
+    this.setState(Object.assign({}, o, {copied: false}));
+  }
   formatForm() {
     return  <div style={{
       float:'left',
@@ -120,7 +141,7 @@ class Format extends Component {
         max={32}
         step={1}
         value={this.state.length}
-        onChange={(v) => this.setState({length: v})}
+        onChange={(v) => this.changeFormat({length: v})}
         trackStyle={{
           backgroundColor: blueGrey[700],
           height: 6 }}
@@ -140,13 +161,13 @@ class Format extends Component {
       label='Variation'
       type="number"
       value={this.state.nonce}
-      onChange={(e) => this.setState({nonce: e.target.value})}
+      onChange={(e) => this.changeFormat({nonce: e.target.value})}
       />
     <br/>
     <TextField
       label='Start with'
       value={this.state.startsWith}
-      onChange={(e) => this.setState({startsWith: e.target.value})}
+      onChange={(e) => this.changeFormat({startsWith: e.target.value})}
     />
     </div>
     <div style={{width:185, float:'left'}}>
@@ -155,7 +176,7 @@ class Format extends Component {
           <Checkbox
             className={this.props.classes.checkBox}
             checked={this.state.digits}
-            onChange={(e) => this.setState({digits: e.target.checked})}
+            onChange={(e) => this.changeFormat({digits: e.target.checked})}
             value="digits"
           />
         }
@@ -166,7 +187,7 @@ class Format extends Component {
           <Checkbox
             className={this.props.classes.checkBox}
             checked={this.state.lowercase}
-            onChange={(e) => this.setState({lowercase: e.target.checked})}
+            onChange={(e) => this.changeFormat({lowercase: e.target.checked})}
             value="lowercase"
           />
         }
@@ -177,7 +198,7 @@ class Format extends Component {
           <Checkbox
             className={this.props.classes.checkBox}
             checked={this.state.uppercase}
-            onChange={(e) => this.setState({uppercase: e.target.checked})}
+            onChange={(e) => this.changeFormat({uppercase: e.target.checked})}
             value="uppercase"
           />
         }
@@ -188,19 +209,67 @@ class Format extends Component {
           <Checkbox
             className={this.props.classes.checkBox}
             checked={this.state.specialchar}
-            onChange={(e) => this.setState({specialchar: e.target.checked})}
+            onChange={(e) => this.changeFormat({specialchar: e.target.checked})}
             value="specialchar"
           />
         }
         label={__('Special Characters')}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            className={this.props.classes.checkBox}
+            checked={!this.state.allowConsecutive}
+            onChange={(e) => this.changeFormat({allowConsecutive: !e.target.checked})}
+            value="allowConsecutive"
+          />
+        }
+        label={__('Avoid consecutive')}
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            className={this.props.classes.checkBox}
+            checked={!this.state.allowDuplicates}
+            onChange={(e) => this.changeFormat({allowDuplicates: !e.target.checked})}
+            value="allowDuplicates"
+          />
+        }
+        label={__('Avoid duplicates')}
       />
   </div>
   </div>
   }
   render() {
     console.log(this.props);
-    if(this.props.working || !this.props.values || !this.props.values.passwordHash) {
-      return <div></div>;
+    if(this.props.working || !this.props.passwordHash) {
+      return <div style={{marginTop: 10}}>
+        <CircularProgress style={{
+            float:'left',
+            height:30,
+            width:30,
+            marginRight: 9,
+            marginTop: 2
+          }} />
+        <div style={{
+            float:'left',
+            width:300
+          }}>
+          {!this.props.passwordHash?
+            <strong>{__('Hashing your passphrase')}</strong>
+            : <span>{__('Hashing your passphrase')}<DoneIcon style={{
+              position: 'absolute',
+              marginTop: -6,
+              marginLeft: 10
+            }}/></span>
+          }<br/>
+        {!this.props.passwordHash?
+            __('Checking Format') :
+            <strong>{__('Checking Format')}</strong>
+          }
+        </div>
+        <div style={{clear: 'both'}}></div>
+      </div>
     }
     const f = this.props.result ?
       FormatConverter.fromHex(this.props.result)
@@ -208,12 +277,16 @@ class Format extends Component {
         length: this.state.length,
         nonce: this.state.nonce,
         startsWith: this.state.startsWith,
+        allowConsecutive: this.state.allowConsecutive,
+        allowDuplicates: this.state.allowDuplicates,
         allowedCharacters:
             (this.state.digits?CharacterClass.DIGITS:0)
           | (this.state.lowercase?CharacterClass.LOWERCASE:0)
           | (this.state.uppercase?CharacterClass.UPPERCASE:0)
           | (this.state.specialchar?CharacterClass.ACCENTUATED|CharacterClass.SYMBOLES:0)
         });
+    const pass = f.randomStringFromKey(this.props.passwordHash);
+    const { classes } = this.props;
     return <div>
       <div style={{
           position: 'relative',
@@ -242,13 +315,41 @@ class Format extends Component {
           </Typography>}
       </div>
       {this.state.editFormat ? this.formatForm() : null}
-
-      {this.props.values.passwordHash}<br/>
-      {this.props.values.application}<br/>
-      {this.props.result}<br/>
+      <div style={{clear: 'both'}}></div>
+      <br/>
 
     <span style={{fontSize:'40px'}}><ForwardIcon /></span>
-      {f.randomStringFromKey(this.props.values.passwordHash)}
+      <FormControl
+        className={classes.formControl}>
+        <InputLabel htmlFor="derivedKey">
+          {__('Generated password')}</InputLabel>
+        <Input
+          id="derivedKey"
+          readOnly
+          type={this.state.showPassword ? 'text' : "password"}
+          value={pass}
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => this.setState({showPassword: !this.state.showPassword})}
+              >
+                {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
+              </IconButton>
+            </InputAdornment>
+          }
+        />
+      </FormControl>
+      <CopyToClipboard text={pass}
+        onCopy={() => this.setState({copied: true})}>
+        <Button
+          raised color="primary"
+          className={classes.button} >
+          {this.state.copied ?
+            <DoneIcon className={classes.leftIcon} /> :
+            <ContentCopy className={classes.leftIcon} />}
+          {this.state.copied ? __('Copied') : __('Copy')}
+        </Button>
+      </CopyToClipboard>
       </div>
     /*return <div>
       <FormControlLabel
@@ -307,41 +408,44 @@ const styles = theme => ({
   },
   button: {
     margin: theme.spacing.unit,
-  }
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit,
+  },
+  formControl: {
+    margin: theme.spacing.unit,
+    width: 200,
+  },
 });
 
 
-
-const Debounce = ({passwordHash, application}) =>
-<DebounceComponent
-  delay={100}
-  component={withStyles(styles)(Format)}
-  values={{passwordHash, application}}
-  compute={
-    (values) => {
-      return new Promise((accept, reject) => {
-        if(!values.passwordHash) {
-          accept('');
+export default DebounceComponent({
+  delay:100,
+  compute: ({passwordHash, application}) => {
+    return new Promise((accept, reject) => {
+      if(!passwordHash) {
+        accept('');
+      }
+      scrypt(
+        passwordHash,
+        config.scryptFormatHashSaltPrefix+application,
+        config.scryptFormatHashOptions,
+        function(key) {
+          key = '0x'+key;
+          Eth.contractInstance.passwordFormat.call(
+            key,
+            function(err, format) {
+              if(err) {
+                reject(err);
+                return;
+              }
+              accept(toAscii(format));
+            });
         }
-        scrypt(
-          values.passwordHash,
-          config.scryptFormatHashSaltPrefix+values.application,
-          config.scryptFormatHashOptions,
-          function(key) {
-            key = '0x'+key;
-            Eth.contractInstance.passwordFormat.call(
-              key,
-              function(err, format) {
-                if(err) {
-                  reject(err);
-                  return;
-                }
-                accept(toAscii(format));
-              });
-          }
-        )
-      })
-    }
-  } />
-
-export default Debounce;
+      )
+    })
+  }
+  })(withStyles(styles)(Format));
