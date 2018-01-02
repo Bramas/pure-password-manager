@@ -139,11 +139,13 @@ class Format extends Component {
     <TextField
       label='Variation'
       type="number"
+      value={this.state.nonce}
       onChange={(e) => this.setState({nonce: e.target.value})}
       />
     <br/>
     <TextField
       label='Start with'
+      value={this.state.startsWith}
       onChange={(e) => this.setState({startsWith: e.target.value})}
     />
     </div>

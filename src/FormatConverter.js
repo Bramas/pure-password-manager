@@ -41,6 +41,8 @@ const optionSize = {
 
 function FormatConverter(options) {
   this.options = Object.assign({}, defaultOptions, options || {});
+  this.options.nonce = parseInt(this.options.nonce);
+  this.options.version = parseInt(this.options.version);
 }
 
 function padLeft(str, n){
@@ -142,10 +144,25 @@ function shuffleKFirst(charset, k, randInput)
   return charset.substr(0, k);
 }
 
+/*
+* create a variation of the key with the nonce given
+* in the options.
+* the resulting key has the same length
+*/
 FormatConverter.prototype.saltWithNonce = function(keyHex)
 {
-  keyHex.sh
-  shajs.sha(512)
+  const keyLength = keyHex.length;
+  const keyParts = [];
+  while(keyHex) {
+    const len = 512/4;
+    keyParts.push(
+      shajs('sha512')
+      .update(keyHex.substr(0,len) + this.options.nonce)
+      .digest('hex')
+    );
+    keyHex = keyHex.substr(len);
+  }
+  return keyParts.join('').substr(0, keyLength);
 }
 
 
@@ -155,8 +172,12 @@ FormatConverter.prototype.saltWithNonce = function(keyHex)
 FormatConverter.prototype.randomStringFromKey =
   function(keyHex)
 {
+  if(!keyHex) {
+    throw new Error('The key is null, undefined or empty');
+  }
   if(this.options.nonce) {
-    keyHex = this.saltWithNonce(key);
+    console.log(this.options.nonce);
+    keyHex = this.saltWithNonce(keyHex);
   }
   const charset = this.getCharset();
 
