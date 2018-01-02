@@ -1,3 +1,5 @@
+
+import shajs from 'sha.js';
 var bigInt = require("big-integer");
 
 export const CharacterClass = Object.freeze({
@@ -26,7 +28,7 @@ const defaultOptions = {
                     CharacterClass.ALPHANUMERIC,
   allowConsecutive: true, // 1 bit
   allowDuplicates:  true, // 1 bit
-  startWith:        ''    // 12 bytes
+  startsWith:        ''    // 12 bytes
 }
 const optionSize = {
   version:           1,
@@ -34,7 +36,7 @@ const optionSize = {
   length:            1,
   allowedCharacters: 2,
   allowOptions:      1, // 1 bit + 1 bit + alignment
-  startWith:         12
+  startsWith:         12
 }
 
 function FormatConverter(options) {
@@ -62,20 +64,11 @@ FormatConverter.prototype.toHex = function() {
   allow |= this.options.allowDuplicates << 1;
   hex.push(toHex(allow, optionSize.allowOptions));
 
-  var startWithHex = [...this.options.startWith]
+  var startsWithHex = [...this.options.startsWith]
     .map((c) => c.charCodeAt(0))
     .map((c) => toHex(c,1));
-  hex.push(padRight(startWithHex.join('').substr(0, optionSize.startWith), optionSize.startWith*2));
+  hex.push(padRight(startsWithHex.join('').substr(0, optionSize.startsWith), optionSize.startsWith*2));
   return hex.join('');
-}
-
-function randomChar(charset, randInput)
-{
-  let idx = 0
-  if(randInput[idx] < max)
-  {
-    return randInput[idx];
-  }
 }
 
 function power_of_2(n) {
@@ -149,12 +142,22 @@ function shuffleKFirst(charset, k, randInput)
   return charset.substr(0, k);
 }
 
+FormatConverter.prototype.saltWithNonce = function(keyHex)
+{
+  keyHex.sh
+  shajs.sha(512)
+}
+
+
 /**
 * generate a random string from an hexadecimal key
 */
 FormatConverter.prototype.randomStringFromKey =
   function(keyHex)
 {
+  if(this.options.nonce) {
+    keyHex = this.saltWithNonce(key);
+  }
   const charset = this.getCharset();
 
   let range = charset.length;
@@ -167,7 +170,7 @@ FormatConverter.prototype.randomStringFromKey =
 
   if(!this.options.allowDuplicates)
   {
-    return shuffleKFirst(charset, this.options.length, key);
+    return this.options.startsWith + shuffleKFirst(charset, this.options.length, key);
   }
 
   let blockSize = getBestBlockSize(
@@ -188,7 +191,7 @@ FormatConverter.prototype.randomStringFromKey =
     lastValue = value;
     str.push(charset[value]);
   }
-  return str.join('');
+  return this.options.startsWith + str.join('');
 }
 
 export default {
@@ -219,13 +222,13 @@ export default {
     options.allowConsecutive = !!(allowOptions & 1);
     options.allowDuplicates  = !!(allowOptions & (1 << 1));
 
-    options.startWith = []
-    for(let i = 0; i < optionSize.startWith; i++) {
+    options.startsWith = []
+    for(let i = 0; i < optionSize.startsWith; i++) {
       let c = parseInt(hex.substr(i*2,2), 16);
-      options.startWith.push(String.fromCharCode(c));
+      options.startsWith.push(String.fromCharCode(c));
     }
-    options.startWith = options.startWith.join('').replace(/\u0000/g, '');
-    hex = hex.substr(optionSize.startWith*2);
+    options.startsWith = options.startsWith.join('').replace(/\u0000/g, '');
+    hex = hex.substr(optionSize.startsWith*2);
     return new FormatConverter(options);
   },
   create: (options) => {

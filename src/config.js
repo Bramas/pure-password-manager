@@ -7,15 +7,15 @@ export default {
     N: 16384,
     r: 8,
     p: 1,
-    dkLen: 64,
-    encoding: 'base64',
+    dkLen: 128,
+    encoding: 'hex',
     interruptStep : 100
   },
   scryptFormatHashOptions:{
     N: 16384,
     r: 8,
     p: 1,
-    dkLen: 20,
+    dkLen: 16,
     encoding: 'hex',
     interruptStep : 100
   },

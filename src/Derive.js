@@ -126,7 +126,8 @@ class Derive extends Component {
         {this.props.result && this.props.values ?
           <Format
             passwordHash={this.props.result}
-            application={this.props.values.application}/>
+            application={this.props.values.application}
+            />
             : ''
         }
       </span>
@@ -140,10 +141,15 @@ Derive.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
+const D = ({values, result}) => values ? <Format
+  passwordHash={result}
+  application={values.application}
+  /> : '';
+
 const Debounce = ({passphrase, application}) =>
 <DebounceComponent
   delay={100}
-  component={withStyles(styles)(Derive)}
+  component={D}
   values={{passphrase, application}}
   compute={
     (values) => {

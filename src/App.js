@@ -12,6 +12,7 @@ import IconButton from 'material-ui/IconButton';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import { CircularProgress } from 'material-ui/Progress';
+import AddIcon from 'material-ui-icons/Add';
 import Identicon from 'identicon.js';
 import parse from 'url-parse';
 import shajs from 'sha.js';
@@ -134,7 +135,7 @@ class App extends Component {
           <div
             className={'identicon-help '+this.props.classes.identiconHelp}>
               {__('This image is a visual representation of '+
-                 'the generated password, you should familiarize'+
+                 'your main password, you should familiarize'+
                  ' with it so that you can detect quickly '+
                  'if you mispelled your main password')}
           </div>
@@ -173,7 +174,7 @@ class App extends Component {
           </FormControl>
           {this.renderIdenticon()}
           <br/>
-          <span style={{fontSize:'40px'}}>+ </span>
+          <span style={{fontSize:'40px'}}><AddIcon /> </span>
           <FormControl
             className={classes.textField}>
             <InputLabel htmlFor="salt">
@@ -182,14 +183,12 @@ class App extends Component {
             <Input
               inputProps={{tabIndex:2}}
               id="salt"
-              margin="normal"
               value={this.state.salt}
               onChange={this.updateSalt.bind(this)}
             />
           </FormControl>
           <br/>
           <br/>
-          <span style={{fontSize:'40px'}}>= </span>
           <Derive application={this.state.salt} passphrase={this.state.passphrase} />
         </Paper>
         <Paper className={classes.paper}>

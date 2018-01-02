@@ -42,6 +42,7 @@ class DebounceComponent extends Component {
   }
   startComputation(values) {
     console.log('startComputation', values);
+    this.setState({values});
     if(!this.state.working) {
       this.setState({working: true});
       this.forceUpdate();
