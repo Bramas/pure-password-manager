@@ -176,7 +176,6 @@ FormatConverter.prototype.randomStringFromKey =
     throw new Error('The key is null, undefined or empty');
   }
   if(this.options.nonce) {
-    console.log(this.options.nonce);
     keyHex = this.saltWithNonce(keyHex);
   }
   const charset = this.getCharset();
@@ -226,9 +225,8 @@ export default {
     }
     const options = {};
 
-    options.version =
-      parseInt(hex.substr(0,optionSize.version*2), 16);
-      //console.log(hex.substr(0,optionSize.version), parseInt(hex.substr(0,optionSize.version), 16));
+    options.version =  parseInt(hex.substr(0,optionSize.version*2), 16);
+
     hex = hex.substr(optionSize.version*2);
 
     options.nonce =

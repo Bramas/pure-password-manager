@@ -21,11 +21,11 @@ export default (options) => (DecoratedComponent) => {
       return this.state.working;
     }
     handleResult(values, result) {
-      console.log('handleResult', values, result);
+      console.debug('handleResult', values, result);
 
       if(!this.valuesEquals(values))
       {
-        console.log('restart');
+        console.debug('restart');
         this.startComputation(this.props);
         return;
       }
@@ -44,7 +44,7 @@ export default (options) => (DecoratedComponent) => {
       this.forceUpdate();
     }
     startComputation(values) {
-      console.log('startComputation', values);
+      console.debug('startComputation', values);
       this.setState({
         values,
         result: null
@@ -58,7 +58,7 @@ export default (options) => (DecoratedComponent) => {
         .catch(this.onError.bind(this, values));
     }
     handleTimeout(values) {
-      console.log('handleTimeout', values, this.valuesEquals(values))
+      console.debug('handleTimeout', values, this.valuesEquals(values))
       if(!this.valuesEquals(values))
       {
         return;
@@ -70,7 +70,7 @@ export default (options) => (DecoratedComponent) => {
         values,
         result: null
       });
-      console.log('planUpdate', values, this.state.working)
+      console.debug('planUpdate', values, this.state.working)
       if(this.state.working) {
         return;
       }
