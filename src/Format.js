@@ -68,7 +68,7 @@ class Format extends Component {
       this.setState(Object.assign({}, defaultState));
     }
 
-    console.log(this.props.result && this.props.result.format, '=>', nextProps.result && nextProps.result.format);
+    console.debug(this.props.result && this.props.result.format, '=>', nextProps.result && nextProps.result.format);
     if(!this.props.result && nextProps.result) {
       if(!nextProps.result.format.match(/^0x0*$/)) {
         const f = FormatConverter.fromHex(nextProps.result.format);
@@ -92,7 +92,7 @@ class Format extends Component {
   {
     const key = this.props.result.key;
     const format = this.state.formatConverter.toHex();
-    console.log('Saving Format to Blockchain', {key, format});
+    console.debug('Saving Format to Blockchain', {key, format});
 
     Eth.contractInstance.addPasswordFormat.sendTransaction(
       key,
@@ -102,7 +102,7 @@ class Format extends Component {
           console.error(err);
           return;
         }
-        console.log('SAVED', {txHash});
+        console.debug('SAVED', {txHash});
       });
   }
   updateFormat(e) {
@@ -269,7 +269,7 @@ class Format extends Component {
   </div>
   }
   render() {
-    console.log(this.props);
+    console.debug(this.props);
     if(this.props.working || !this.props.passwordHash) {
       return <div style={{marginTop: 10}}>
         <CircularProgress style={{
@@ -299,7 +299,7 @@ class Format extends Component {
         <div style={{clear: 'both'}}></div>
       </div>
     }
-    console.log(
+    console.debug(
       'randomString from ',
       this.props.passwordHash,
       this.state.formatConverter
