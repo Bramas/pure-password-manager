@@ -1,4 +1,17 @@
 
+if(process.env.BABEL_ENV === 'development')
+{
+  console.debug = console.log;
+  console.log('development');
+}
+else {
+  if(!process.env.BABEL_ENV)
+  {
+    //console.log('no BABEL_ENV environment variable', process.env.BABEL_ENV);
+  }
+  console.debug = () => {};
+}
+
 
 export default {
   etherNetwork: 'ropsten', // 'ropsten': testnet, 'mainnet': production net

@@ -143,10 +143,7 @@ class App extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.root}>
-        <Paper className={classes.paper}>
-          <Typography type="display1" style={{textAlign:'center'}}>Pure Password Manager</Typography>
-          <br/>
+      <div>
           <FormControl
             className={classes.passphraseFormControl}>
             <InputLabel htmlFor="passphrase">
@@ -187,16 +184,11 @@ class App extends Component {
           </FormControl>
           <br/>
           <br/>
-          <Derive application={this.state.salt} passphrase={this.state.passphrase} />
-        </Paper>
-        <Paper className={classes.paper}>
-          <Typography type="caption">How does it work? </Typography>
-          <Typography type="caption">The main password is hashed with scrypt using the destination
-            website as salt. The first 12 alphanumeric characters of the base64 encoded hashed value
-            is the generated password.<br/>
-            If you like it, I accept donation in Ether at this address: 0x1Bcae562115A3bE1336FE2761647BBf0Ceb9574a
-          </Typography>
-        </Paper>
+          <Derive
+            application={this.state.salt}
+            passphrase={this.state.passphrase}
+            actionButton={this.props.actionButton}
+          />
       </div>
     );
   }

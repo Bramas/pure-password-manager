@@ -9,12 +9,13 @@ import config from './config';
 class Derive extends Component {
   render()
   {
-    const {passphrase, application, result} = this.props;
+    const {passphrase, application, result, actionButton} = this.props;
     if(!application && !passphrase) return '';
 
     return <Format
         passwordHash={result}
         application={application}
+        actionButton={actionButton}
       />;
   }
 }

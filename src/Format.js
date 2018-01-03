@@ -359,17 +359,7 @@ class Format extends Component {
           }
         />
       </FormControl>
-      <CopyToClipboard text={pass}
-        onCopy={() => this.setState({copied: true})}>
-        <Button
-          raised color="primary"
-          className={classes.button} >
-          {this.state.copied ?
-            <DoneIcon className={classes.leftIcon} /> :
-            <ContentCopy className={classes.leftIcon} />}
-          {this.state.copied ? __('Copied') : __('Copy')}
-        </Button>
-      </CopyToClipboard>
+      {<this.props.actionButton password={pass} />}
       </div>
   }
 }
