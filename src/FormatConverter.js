@@ -6,18 +6,16 @@ export const CharacterClass = Object.freeze({
   DIGITS:      1,
   LOWERCASE:   2,
   UPPERCASE:   4,
-  ACCENTUATED: 8,
-  SYMBOLES:    16,
+  SYMBOLES:    8,
 
   ALPHANUMERIC: 1+2+4,
-  ALL:          1+2+4+8+16
+  ALL:          1+2+4+8
 });
 export const CharacterCharset = Object.freeze({
   1:      '0123456789',
   2:   'abcdefghijklmnopqrstuvwxyz',
   4:   'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  8: 'çÇüéëèêâäàáíïîìôöòóúûùÿýñÑÁÂÀÄÉÊËÈÍÎÏÌÓÔÒÖÜÚÛÙÝ',
-  16:    '#$%&@|_~-*+/=,:;?!/([{}]) ',
+  8: 'çÇüéëèêâäàáíïîìôöòóúûùÿýñÑÁÂÀÄÉÊËÈÍÎÏÌÓÔÒÖÜÚÛÙÝ#$%&@|_~-*+/=,:;?!/([{}])',
 });
 
 const defaultOptions = {
@@ -41,8 +39,9 @@ const optionSize = {
 
 function FormatConverter(options) {
   this.options = Object.assign({}, defaultOptions, options || {});
-  this.options.nonce = parseInt(this.options.nonce);
-  this.options.version = parseInt(this.options.version);
+  this.options.nonce = parseInt(this.options.nonce, 10);
+  this.options.version = parseInt(this.options.version, 10);
+  this.options.length = parseInt(this.options.length, 10);
 }
 
 function padLeft(str, n){
@@ -59,6 +58,7 @@ FormatConverter.prototype.toHex = function() {
   const hex = ['0x'];
   hex.push(toHex(this.options.version, optionSize.version));
   hex.push(toHex(this.options.nonce, optionSize.nonce));
+  hex.push(toHex(this.options.length, optionSize.length));
   hex.push(toHex(this.options.allowedCharacters, optionSize.allowedCharacters));
 
   var allow = 0;
@@ -221,6 +221,9 @@ export default {
     {
       hex = hex.substr(2);
     }
+    if(hex.match(/^0*$/)) {
+      return new FormatConverter();
+    }
     const options = {};
 
     options.version =
@@ -231,6 +234,10 @@ export default {
     options.nonce =
       parseInt(hex.substr(0,optionSize.nonce*2), 16);
     hex = hex.substr(optionSize.nonce*2);
+
+    options.length =
+      parseInt(hex.substr(0,optionSize.length*2), 16);
+    hex = hex.substr(optionSize.length*2);
 
     options.allowedCharacters =
       parseInt(hex.substr(0,optionSize.allowedCharacters*2), 16);

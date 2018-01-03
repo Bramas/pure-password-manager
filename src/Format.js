@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Derive from './Derive';
-import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
@@ -10,7 +8,7 @@ import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import ContentCopy  from 'material-ui-icons/ContentCopy';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { FormGroup, FormControlLabel, FormControl } from 'material-ui/Form';
+import { FormControlLabel, FormControl } from 'material-ui/Form';
 import { CircularProgress } from 'material-ui/Progress';
 import Checkbox from 'material-ui/Checkbox';
 import IconButton from 'material-ui/IconButton';
@@ -23,29 +21,11 @@ import DebounceComponent from './DebounceComponent';
 import FormatConverter, {CharacterClass} from './FormatConverter';
 import blueGrey from 'material-ui/colors/blueGrey';
 import Slider from 'rc-slider';
-import SettingsIcon from 'material-ui-icons/Settings';
 import ShuffleIcon from 'material-ui-icons/Shuffle';
 import TuneIcon from 'material-ui-icons/Tune';
 import ForwardIcon from 'material-ui-icons/Forward';
-import TranslateIcon from 'material-ui-icons/Translate';
 import DoneIcon from 'material-ui-icons/Done';
 import 'rc-slider/assets/index.css';
-
-
-function toAscii(hex) {
-  var str = "";
-  var i = 0, l = hex.length;
-  if (hex.substring(0, 2) === '0x') {
-      i = 2;
-  }
-  for (; i < l; i+=2) {
-      var code = parseInt(hex.substr(i, 2), 16);
-      if (code === 0) continue; // this is added
-      str += String.fromCharCode(code);
-  }
-
-  return str;
-}
 
 const defaultState = {
   length: 12,
@@ -58,6 +38,7 @@ const defaultState = {
   editFormat: false,
   allowConsecutive: true,
   allowDuplicates: true,
+  formatAbstract: __('12 Alphanumeric Characters')
 };
 
 class Format extends Component {
@@ -66,7 +47,11 @@ class Format extends Component {
     this.state = Object.assign(
       {},
       defaultState,
-      {showPassword:false, copied: false}
+      {
+        showPassword:false,
+        copied: false,
+        formatConverter: FormatConverter.create()
+      }
     );
   }
   isPrivate() {
@@ -82,44 +67,63 @@ class Format extends Component {
     if(nextProps.passwordHash !== this.props.passwordHash) {
       this.setState(Object.assign({}, defaultState));
     }
+
+    console.log(this.props.result && this.props.result.format, '=>', nextProps.result && nextProps.result.format);
+    if(!this.props.result && nextProps.result) {
+      if(!nextProps.result.format.match(/^0x0*$/)) {
+        const f = FormatConverter.fromHex(nextProps.result.format);
+        this.setState({
+          length: f.options.length,
+          digits: !!(f.options.allowedCharacters & CharacterClass.DIGITS),
+          lowercase: !!(f.options.allowedCharacters & CharacterClass.LOWERCASE),
+          uppercase: !!(f.options.allowedCharacters & CharacterClass.UPPERCASE),
+          specialchar: !!(f.options.allowedCharacters & CharacterClass.SYMBOLES),
+          nonce: f.options.nonce,
+          startsWith: f.options.startsWith,
+          allowConsecutive: f.options.allowConsecutive,
+          allowDuplicates: f.options.allowDuplicates,
+          formatAbstract: __('Your custom format'),
+          formatConverter: f
+        });
+      }
+    }
   }
   saveFormat()
   {
-    let passwordHash = this.props.passwordHash;
-    let application = this.props.application;
-    let format = this.state.format;
-    let self = this;
-    console.log('Saving Format to Blockchain', {passwordHash, application, format});
-    let p = new Promise((accept, reject) => {
-      scrypt(
-        passwordHash,
-        config.scryptFormatHashSaltPrefix+application,
-        config.scryptFormatHashOptions,
-        function(key) {
-          key = '0x'+key;
-          Eth.contractInstance.addPasswordFormat.sendTransaction(
-            key,
-            Eth.web3.fromAscii(format),
-            function(err, txHash) {
-              if(err) {
-                reject(err);
-                return;
-              }
-              accept(txHash);
-            });
+    const key = this.props.result.key;
+    const format = this.state.formatConverter.toHex();
+    console.log('Saving Format to Blockchain', {key, format});
+
+    Eth.contractInstance.addPasswordFormat.sendTransaction(
+      key,
+      format,
+      function(err, txHash) {
+        if(err) {
+          console.error(err);
+          return;
         }
-      )
-    });
-    p.then((txHash) => self.setState({txHash}))
-    .catch(console.error);
+        console.log('SAVED', {txHash});
+      });
   }
   updateFormat(e) {
     this.setState({format: e.target.value});
   }
   changeFormat(o) {
-    this.setState(Object.assign({}, o, {copied: false}));
+    const options = Object.assign({}, this.state, o);
+
+    options.allowedCharacters = (options.digits?CharacterClass.DIGITS:0)
+      | (options.lowercase?CharacterClass.LOWERCASE:0)
+      | (options.uppercase?CharacterClass.UPPERCASE:0)
+      | (options.specialchar?CharacterClass.SYMBOLES:0)
+
+    let f = FormatConverter.create(options);
+
+    this.setState(Object.assign({}, o, {copied: false, formatConverter: f}));
+
+
   }
   formatForm() {
+
     return  <div style={{
       float:'left',
       width: 410}}>
@@ -238,6 +242,30 @@ class Format extends Component {
         label={__('Avoid duplicates')}
       />
   </div>
+  {this.isPrivate() ?
+    <span>
+      <Button raised onClick={this.saveFormat.bind(this)}>
+        Save it in the Blockchain
+      </Button>
+      <br/>
+      This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
+      so that every time you enter your passphrase with this website, the given format will be used.
+    </span>
+    : (this.isMetaMask() ?
+      <span>
+        <br/>
+        Unlock MetaMask to save the format in the blockchain
+      </span>
+      :
+      <span><br/>
+        You'll have to remember the format for the next
+        time you'll have to enter this password, or you can
+        save it to the ethereum blockchain. To do so you can
+        you can install <a href="https://metamask.io/">MetaMask</a>
+        to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
+      </span>
+    )
+  }
   </div>
   }
   render() {
@@ -271,21 +299,13 @@ class Format extends Component {
         <div style={{clear: 'both'}}></div>
       </div>
     }
-    const f = this.props.result ?
-      FormatConverter.fromHex(this.props.result)
-      : FormatConverter.create({
-        length: this.state.length,
-        nonce: this.state.nonce,
-        startsWith: this.state.startsWith,
-        allowConsecutive: this.state.allowConsecutive,
-        allowDuplicates: this.state.allowDuplicates,
-        allowedCharacters:
-            (this.state.digits?CharacterClass.DIGITS:0)
-          | (this.state.lowercase?CharacterClass.LOWERCASE:0)
-          | (this.state.uppercase?CharacterClass.UPPERCASE:0)
-          | (this.state.specialchar?CharacterClass.ACCENTUATED|CharacterClass.SYMBOLES:0)
-        });
-    const pass = f.randomStringFromKey(this.props.passwordHash);
+    console.log(
+      'randomString from ',
+      this.props.passwordHash,
+      this.state.formatConverter
+  );
+    const pass = this.state.formatConverter.randomStringFromKey(this.props.passwordHash);
+
     const { classes } = this.props;
     return <div>
       <div style={{
@@ -301,7 +321,7 @@ class Format extends Component {
           left: 40,
           width: 300,
           top: 14}}>
-            {__('12 Alphanumeric Characters')}
+            {this.state.formatAbstract}
             <IconButton color="primary"
               className={this.props.classes.button}
               style={{
@@ -351,48 +371,6 @@ class Format extends Component {
         </Button>
       </CopyToClipboard>
       </div>
-    /*return <div>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={this.state.checkedA}
-            onChange={this.handleChange('checkedA')}
-            value="checkedA"
-          />
-        }
-        label="Option A"
-      />
-      <TextField
-        id="format"
-        label={__('Format')}
-        className={this.props.classes.textField}
-        margin="normal"
-        value={this.state.format ? this.state.format : ''}
-        onChange={this.updateFormat.bind(this)}
-      />
-      {this.isPrivate() ?
-        <span><Button raised onClick={this.saveFormat.bind(this)}>Save in the Blockchain</Button>
-          <br/>
-          This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
-          so that every time you enter your passphrase with this website, the given format will be used.
-        </span>
-      : (this.isMetaMask() ?
-        <span>
-          <br/>
-          Unlock MetaMask to save the format in the blockchain
-        </span>
-        :
-        <span><br/>
-          You'll have to remember the format for the next
-          time you'll have to enter this password, or you can
-          save it to the ethereum blockchain. To do so you can
-          you can install <a href="https://metamask.io/">MetaMask</a>
-          to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
-        </span>
-      )}
-      {this.state.txHash ?
-        <div>Transaction hash : <a href={"https://"+config.etherNetwork+".etherscan.io/tx/"+this.state.txHash}>{this.state.txHash}</a></div> : ''}
-    </div>*/
   }
 }
 
@@ -442,7 +420,7 @@ export default DebounceComponent({
                 reject(err);
                 return;
               }
-              accept(toAscii(format));
+              accept({key,format});
             });
         }
       )
