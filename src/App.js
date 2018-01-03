@@ -4,14 +4,16 @@ import PropTypes from 'prop-types';
 import Derive from './Derive';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
-import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
+import AddIcon from 'material-ui-icons/Add';
+import Identicon from 'identicon.js';
 import parse from 'url-parse';
+import shajs from 'sha.js';
 
 import __ from './locale';
 
@@ -28,13 +30,44 @@ const styles = theme => ({
     color: theme.palette.text.secondary,
   },
   textField: {
-    marginRight: theme.spacing.unit,
+    marginTop: 20,
+    marginLeft: 7,
     width: 200,
   },
   passphraseFormControl: {
     marginLeft: '40px',
+    marginTop: '20px',
     marginRight: theme.spacing.unit,
-    width: 400,
+    width: 340,
+  },
+  identiconWrapper: {
+    position: 'relative',
+    display: 'inline-block',
+  },
+  identiconImg: {
+    marginBottom: '-10px',
+  },
+  identiconHelpIcon: {
+    top: '-15px',
+    right: '-15px',
+    border: 'solid 1px #dddddd',
+    padding: '1px 4px',
+    position: 'absolute',
+    borderRadius: '31px',
+    background: 'white',
+    fontSize: '14px',
+    cursor: 'help'
+  },
+  identiconHelp: {
+    top: -22,
+    right:-4,
+    margin: '3px',
+    padding: '20px',
+    background: 'white',
+    border: 'solid 1px #dddddd',
+    position: 'absolute',
+    cursor: 'help',
+    width:400
   },
 });
 
@@ -67,6 +100,46 @@ class App extends Component {
   {
     e.preventDefault();
   }
+  renderIdenticon() {
+    if(!this.state.passphrase)
+    {
+      /*if(this.state.working)
+        return <CircularProgress
+          className={this.props.classes.loader}
+          size={50} />;*/
+      return '';
+    }
+    var data = new Identicon(
+      shajs('sha256').update(this.state.passphrase).digest('hex'),
+      {
+        size: 320,                                // 420px square
+        format: 'svg'
+      }
+    ).toString();
+    return <span
+        className={this.props.classes.identiconWrapper}
+        style={{width:60, height:60}}>
+        <img
+          alt="identicon"
+          width={60}
+          height={60}
+          className={this.props.classes.identiconImg}
+          src={'data:image/svg+xml;base64,' + data}
+        /><div className="identicon-help-hover">
+          <div
+          className={this.props.classes.identiconHelpIcon}>
+            ?
+          </div>
+          <div
+            className={'identicon-help '+this.props.classes.identiconHelp}>
+              {__('This image is a visual representation of '+
+                 'your main password, you should familiarize'+
+                 ' with it so that you can detect quickly '+
+                 'if you mispelled your main password')}
+          </div>
+        </div>
+      </span>
+  }
   render() {
     const { classes } = this.props;
     return (
@@ -80,6 +153,7 @@ class App extends Component {
               {__('Main password')}
             </InputLabel>
             <Input
+              inputProps={{tabIndex:1}}
               id="passphrase"
               onChange={this.updatePassphrase.bind(this)}
               type={this.state.showPassword ? 'text' : "password"}
@@ -96,18 +170,24 @@ class App extends Component {
               }
             />
           </FormControl>
+          {this.renderIdenticon()}
           <br/>
-          <span style={{fontSize:'40px'}}>+ </span><TextField
-            id="salt"
-            label={__('Application or Website')}
-            className={classes.textField}
-            margin="normal"
-            value={this.state.salt}
-            onChange={this.updateSalt.bind(this)}
-          />
+          <span style={{fontSize:'40px'}}><AddIcon /> </span>
+          <FormControl
+            className={classes.textField}>
+            <InputLabel htmlFor="salt">
+              {__('Application or Website')}
+            </InputLabel>
+            <Input
+              inputProps={{tabIndex:2}}
+              id="salt"
+              value={this.state.salt}
+              onChange={this.updateSalt.bind(this)}
+            />
+          </FormControl>
           <br/>
           <br/>
-          <span style={{fontSize:'40px'}}>= </span><Derive salt={this.state.salt} passphrase={this.state.passphrase} />
+          <Derive application={this.state.salt} passphrase={this.state.passphrase} />
         </Paper>
         <Paper className={classes.paper}>
           <Typography type="caption">How does it work? </Typography>
