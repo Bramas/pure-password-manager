@@ -38,7 +38,10 @@ const defaultState = {
   editFormat: false,
   allowConsecutive: true,
   allowDuplicates: true,
-  formatAbstract: __('12 Alphanumeric Characters')
+  formatAbstract: __('12 Alphanumeric Characters'),
+  sending: false,
+  txHash: null,
+  transactionError: null
 };
 
 class Format extends Component {
@@ -49,23 +52,17 @@ class Format extends Component {
       defaultState,
       {
         showPassword:false,
-        copied: false,
-        formatConverter: FormatConverter.create()
+        formatConverter: FormatConverter.create(),
+        tip: 0.001
       }
     );
-  }
-  isPrivate() {
-    return Eth.web3.isAddress(Eth.web3.eth.defaultAccount);
-  }
-  isMetaMask() {
-    return Eth.web3.currentProvider.isMetaMask === true;
   }
   componentWillMount() {
     Eth.init();
   }
   componentWillReceiveProps(nextProps) {
     if(nextProps.passwordHash !== this.props.passwordHash) {
-      this.setState(Object.assign({}, defaultState));
+      this.changeFormat(defaultState);
     }
 
     console.debug(this.props.result && this.props.result.format, '=>', nextProps.result && nextProps.result.format);
@@ -90,20 +87,16 @@ class Format extends Component {
   }
   saveFormat()
   {
+    this.setState({sending: true});
     const key = this.props.result.key;
     const format = this.state.formatConverter.toHex();
-    console.debug('Saving Format to Blockchain', {key, format});
-
-    Eth.contractInstance.addPasswordFormat.sendTransaction(
-      key,
-      format,
-      function(err, txHash) {
-        if(err) {
-          console.error(err);
-          return;
-        }
-        console.debug('SAVED', {txHash});
+    Eth.saveFormat(key, format, Eth.web3.toWei(this.state.tip, 'ether'), (err, txHash) => {
+      this.setState({
+        sending: false,
+        txHash: txHash,
+        transactionError: err,
       });
+    });
   }
   updateFormat(e) {
     this.setState({format: e.target.value});
@@ -118,8 +111,47 @@ class Format extends Component {
 
     let f = FormatConverter.create(options);
 
-    this.setState(Object.assign({}, o, {copied: false, formatConverter: f}));
+    this.setState(Object.assign({}, o, {formatConverter: f}));
 
+
+  }
+  sendButton() {
+    return Eth.isPrivate() ?
+      <span>
+        <Button raised onClick={this.saveFormat.bind(this)}>
+          Save it in the Blockchain
+        </Button>
+        <TextField style={{
+            width:100,
+            marginLeft: 20
+          }}
+          onChange={(e) => this.setState({tip: e.target.value})}
+          type='number'
+          label='tip for the dev'
+          value={this.state.tip} />
+        <br/>
+        <br/>
+        <Typography type='caption'>
+          This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
+          so that every time you enter your passphrase with this website, the given format will be used.
+        </Typography>
+      </span>
+      : (Eth.isMetaMask() ?
+        <span>
+          <br/>
+          <Typography type='caption'>
+            Unlock MetaMask to save the format in the blockchain
+          </Typography>
+        </span>
+        :
+        <span><br/>
+          You'll have to remember the format for the next
+          time you'll have to enter this password, or you can
+          save it to the ethereum blockchain. To do so you can
+          you can install <a href="https://metamask.io/">MetaMask</a>
+          to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
+        </span>
+      )
 
   }
   formatForm() {
@@ -242,30 +274,26 @@ class Format extends Component {
         label={__('Avoid duplicates')}
       />
   </div>
-  {this.isPrivate() ?
-    <span>
-      <Button raised onClick={this.saveFormat.bind(this)}>
-        Save it in the Blockchain
-      </Button>
-      <br/>
-      This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
-      so that every time you enter your passphrase with this website, the given format will be used.
-    </span>
-    : (this.isMetaMask() ?
-      <span>
-        <br/>
-        Unlock MetaMask to save the format in the blockchain
-      </span>
+  <div style={{clear: 'both'}}></div>
+  <div style={{
+      marginTop: 20
+    }}>
+    {
+      this.state.transactionError ?
+      <div>{this.state.transactionError}</div> : null
+    }
+    {this.state.txHash ?
+      <div>
+        Success : <a href={"https://"+config.etherNetwork+".etherscan.io/tx/"+this.state.txHash}>see transaction</a>
+      </div>
+    : (this.state.sending ?
+      <div>
+        {__('Sending')}
+      </div>
       :
-      <span><br/>
-        You'll have to remember the format for the next
-        time you'll have to enter this password, or you can
-        save it to the ethereum blockchain. To do so you can
-        you can install <a href="https://metamask.io/">MetaMask</a>
-        to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
-      </span>
-    )
-  }
+      this.sendButton()
+    )}
+  </div>
   </div>
   }
   render() {

@@ -79,7 +79,6 @@ const paperStyle={
     color: theme.palette.text.secondary,
   }
 
-console.debug('DEB');
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>
     <div style={{

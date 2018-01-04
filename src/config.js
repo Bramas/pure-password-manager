@@ -35,44 +35,89 @@ export default {
   scryptFormatHashSaltPrefix : 'pure-formatHash-salt|',
 
   //ropsten testnet contract address
-  contractAddress: "0x1058E0EB52dA0d5FdCEd7b357670Ba06eC95aF91",
+  contractAddress: "0x6aE7b8499231e707eF3c4135B08b6403d9EaCb16",
   contractABI: [
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "bytes16"
-        }
-      ],
-      "name": "passwordFormat",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "passwordHash",
-          "type": "bytes16"
-        },
-        {
-          "name": "format",
-          "type": "bytes32"
-        }
-      ],
-      "name": "addPasswordFormat",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
+  	{
+  		"constant": true,
+  		"inputs": [
+  			{
+  				"name": "",
+  				"type": "bytes16"
+  			}
+  		],
+  		"name": "passwordFormat",
+  		"outputs": [
+  			{
+  				"name": "",
+  				"type": "bytes32"
+  			}
+  		],
+  		"payable": false,
+  		"stateMutability": "view",
+  		"type": "function"
+  	},
+  	{
+  		"constant": true,
+  		"inputs": [],
+  		"name": "owner",
+  		"outputs": [
+  			{
+  				"name": "",
+  				"type": "address"
+  			}
+  		],
+  		"payable": false,
+  		"stateMutability": "view",
+  		"type": "function"
+  	},
+  	{
+  		"anonymous": false,
+  		"inputs": [
+  			{
+  				"indexed": true,
+  				"name": "_from",
+  				"type": "address"
+  			},
+  			{
+  				"indexed": false,
+  				"name": "_value",
+  				"type": "uint256"
+  			}
+  		],
+  		"name": "Deposit",
+  		"type": "event"
+  	},
+  	{
+  		"constant": false,
+  		"inputs": [
+  			{
+  				"name": "passwordHash",
+  				"type": "bytes16"
+  			},
+  			{
+  				"name": "format",
+  				"type": "bytes32"
+  			}
+  		],
+  		"name": "addPasswordFormat",
+  		"outputs": [],
+  		"payable": true,
+  		"stateMutability": "payable",
+  		"type": "function"
+  	},
+  	{
+  		"constant": false,
+  		"inputs": [],
+  		"name": "withdraw",
+  		"outputs": [],
+  		"payable": false,
+  		"stateMutability": "nonpayable",
+  		"type": "function"
+  	},
+  	{
+  		"payable": true,
+  		"stateMutability": "payable",
+  		"type": "fallback"
+  	}
   ]
 }

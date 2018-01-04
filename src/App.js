@@ -86,6 +86,11 @@ class App extends Component {
       salt: app
     }
   }
+  componentWillMount() {
+    if(this.props.defaultSalt) {
+      this.setState({salt: this.props.defaultSalt});
+    }
+  }
   updatePassphrase(e) {
     this.setState({passphrase: e.target.value});
   }
