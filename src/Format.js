@@ -220,7 +220,9 @@ class Format extends Component {
       />
     <br/>
     <TextField
-      label='Start with'
+      InputProps={{maxLength:12, size:12}}
+      maxLength={12}
+      label='Starts with'
       value={this.state.startsWith}
       onChange={(e) => this.changeFormat({startsWith: e.target.value})}
     />

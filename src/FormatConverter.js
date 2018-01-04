@@ -43,6 +43,7 @@ function FormatConverter(options) {
   this.options.nonce = parseInt(this.options.nonce, 10);
   this.options.version = parseInt(this.options.version, 10);
   this.options.length = parseInt(this.options.length, 10);
+  this.options.startsWith = this.options.startsWith.substr(0,optionSize.startsWith);
 }
 
 function padLeft(str, n){
@@ -73,7 +74,7 @@ FormatConverter.prototype.toHex = function() {
   hex.push(padRight(
       startsWithHex
         .join('')
-        .substr(0, optionSize.startsWith*2), 
+        .substr(0, optionSize.startsWith*2),
       optionSize.startsWith*2
     ));
   return hex.join('');
