@@ -119,7 +119,7 @@ class Format extends Component {
     return Eth.isPrivate() ?
       <span>
         <Button raised onClick={this.saveFormat.bind(this)}>
-          Save it in the Blockchain
+          {__("Save it in the Blockchain")}
         </Button>
         <TextField style={{
             width:100,
@@ -127,29 +127,48 @@ class Format extends Component {
           }}
           onChange={(e) => this.setState({tip: e.target.value})}
           type='number'
-          label='tip for the dev'
+          label={__("tip for the dev")}
           value={this.state.tip} />
         <br/>
+         <strong style={{display: 'block', marginTop:'10px'}}>
+           This feature is in test mode, the transaction happens
+           in ropsten test network and once we migrate to the
+           main network, all your format
+           (and so you password if you do not remember
+            those format) will be lost</strong>
         <br/>
         <Typography type='caption'>
-          This will call our <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>smart contract</a> with this format
-          so that every time you enter your passphrase with this website, the given format will be used.
+          {__("This will call a ")}
+            <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>
+              {__('smart contract')}
+            </a>
+            {__(' with this format so that every time you \
+              enter your passphrase with this website, the \
+              given format will be used.')}
         </Typography>
       </span>
       : (Eth.isMetaMask() ?
         <span>
           <br/>
           <Typography type='caption'>
-            Unlock MetaMask to save the format in the blockchain
+            {__("Unlock MetaMask to save the format in the blockchain")}
           </Typography>
         </span>
         :
         <span><br/>
-          You'll have to remember the format for the next
-          time you'll have to enter this password, or you can
-          save it to the ethereum blockchain. To do so you can
-          you can install <a href="https://metamask.io/">MetaMask</a>
-          to be able to do it automatically or call <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>this contract</a> directly
+          <Typography type='caption'>
+            {__("If you change the format, you'll have to remember it for the next \
+            time you have to enter this password. To avoid this, you can \
+            save it to the ethereum blockchain (beta feature). To do so \
+            you can install ")}
+            <a href="https://metamask.io/">MetaMask</a>
+              {__(" to be able to do it automatically \
+                or call ")}
+            <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>
+              {__('this contract')}
+            </a>
+              {__(' directly')}
+          </Typography>
         </span>
       )
 
