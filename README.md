@@ -14,7 +14,7 @@ PurePM is a really simple password manager. It does not store any password local
 By default 12 alphanumeric characters are generated. Anytime you use PurePM with your main password and the name of the website (or application) the same specific 12 alphanumeric characters are generated. Doing this, everything is done in your browser and no communication are performed with any server. You can even download the website and perform all this offline if you want.
 
 If you need (or want) you can choose another format for your password, like 24 lowercase letters, or a password that contains at least a special character.
-The next time you use PurePM, if you select the same format, the same password will be generated. This implies that you have to remember the what format you used for each website. To avoid this you can save the format in the ethereum blockchain calling a simple smart-contract that store formats associated with a hashed version
+The next time you use PurePM, if you select the same format, the same password will be generated. This implies that you have to remember what format you used for each website. To avoid this you can save the format in the ethereum blockchain calling a simple smart-contract that stores formats associated with a hashed version
 of the password. To do this you will need to send a transaction to the ethereum blockchain (with a small fee, not for me but for the validators of the block), then every time you enter your passphrase and the name of the website, a request to the blockchain (through infura.io, the only request made by Pure PM) is made to read the format for your password.
 
 To be really secure, your passphrase have to be long, but it is the only thing you have to remember then to sign in to any website.
