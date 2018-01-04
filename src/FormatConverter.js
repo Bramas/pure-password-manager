@@ -15,7 +15,8 @@ export const CharacterCharset = Object.freeze({
   1:      '0123456789',
   2:   'abcdefghijklmnopqrstuvwxyz',
   4:   'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  8: 'çÇüéëèêâäàáíïîìôöòóúûùÿýñÑÁÂÀÄÉÊËÈÍÎÏÌÓÔÒÖÜÚÛÙÝ#$%&@|_~-*+/=,:;?!/([{}])',
+  8:   '\xe7\xc7\xfc\xe9\xeb\xe8\xea\xe2\xe4\xe0\xe1\xed\xef\xee\xec\xf4\xf6\xf2\xf3\xfa\xfb\xf9\xff\xfd\xf1\xd1\xc1\xc2\xc0\xc4\xc9\xca\xcb\xc8\xcd\xce\xcf\xcc\xd3\xd4\xd2\xd6\xdc\xda\xdb\xd9\xdd#$%&@|_~-*+/=,:;?!/([{}])'
+  //8: 'çÇüéëèêâäàáíïîìôöòóúûùÿýñÑÁÂÀÄÉÊËÈÍÎÏÌÓÔÒÖÜÚÛÙÝ#$%&@|_~-*+/=,:;?!/([{}])',
 });
 
 const defaultOptions = {
