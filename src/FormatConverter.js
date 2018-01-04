@@ -70,7 +70,12 @@ FormatConverter.prototype.toHex = function() {
   var startsWithHex = [...this.options.startsWith]
     .map((c) => c.charCodeAt(0))
     .map((c) => toHex(c,1));
-  hex.push(padRight(startsWithHex.join('').substr(0, optionSize.startsWith), optionSize.startsWith*2));
+  hex.push(padRight(
+      startsWithHex
+        .join('')
+        .substr(0, optionSize.startsWith*2), 
+      optionSize.startsWith*2
+    ));
   return hex.join('');
 }
 
