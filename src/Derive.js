@@ -10,10 +10,9 @@ class Derive extends Component {
   render()
   {
     const {passphrase, application, result, actionButton} = this.props;
-    console.log(!application && !passphrase);
+
     if(!application && !passphrase) return null;
 
-    console.log(Format);
     return <Format
         passwordHash={result}
         application={application}
