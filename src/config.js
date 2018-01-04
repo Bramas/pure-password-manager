@@ -35,7 +35,7 @@ export default {
   scryptFormatHashSaltPrefix : 'pure-formatHash-salt|',
 
   //ropsten testnet contract address
-  contractAddress: "0x6aE7b8499231e707eF3c4135B08b6403d9EaCb16",
+  contractAddress: "0xb4f57264d1145d26524D147A0ae6FF7A9E124E29",
   contractABI: [
   	{
   		"constant": true,
