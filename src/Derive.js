@@ -11,7 +11,7 @@ class Derive extends Component {
   {
     const {passphrase, application, result, actionButton} = this.props;
 
-    if(!application && !passphrase) return null;
+    if(!passphrase) return null;
 
     return <Format
         passwordHash={result}
