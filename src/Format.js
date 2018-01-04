@@ -134,7 +134,7 @@ class Format extends Component {
            This feature is in test mode, the transaction happens
            in ropsten test network and once we migrate to the
            main network, all your format
-           (and so you password if you do not remember
+           (and so your passwords if you do not remember
             those format) will be lost</strong>
         <br/>
         <Typography type='caption'>
