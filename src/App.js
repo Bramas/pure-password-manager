@@ -173,6 +173,7 @@ class App extends Component {
             />
           </FormControl>
           {this.renderIdenticon()}
+          <div className="saveMainPassword">save</div>
           <br/>
           <span style={{fontSize:'40px'}}><AddIcon /> </span>
           <FormControl
