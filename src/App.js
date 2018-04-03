@@ -8,6 +8,7 @@ import { withStyles } from 'material-ui/styles';
 import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
 import { FormControl } from 'material-ui/Form';
 import IconButton from 'material-ui/IconButton';
+import Button from 'material-ui/Button';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
 import AddIcon from 'material-ui-icons/Add';
@@ -15,6 +16,7 @@ import Identicon from 'identicon.js';
 import parse from 'url-parse';
 import shajs from 'sha.js';
 
+import {addIdleEvent} from './utils';
 import __ from './locale';
 
 const styles = theme => ({
@@ -69,6 +71,9 @@ const styles = theme => ({
     cursor: 'help',
     width:400
   },
+  button: {
+    margin: theme.spacing.unit,
+  },
 });
 
 class App extends Component {
@@ -91,11 +96,22 @@ class App extends Component {
       this.setState({salt: this.props.defaultSalt});
     }
   }
+  updateKeyPassphrase(e) {
+    this.setState({keyPassphrase: e.target.value});
+  }
   updatePassphrase(e) {
     this.setState({passphrase: e.target.value});
   }
   updateSalt(e) {
     this.setState({salt: e.target.value});
+  }
+  handleClickShowKeyPasssword()
+  {
+    this.setState({ showKeyPassword: !this.state.showKeyPassword });
+  }
+  handleMouseDownKeyPassword(e)
+  {
+    e.preventDefault();
   }
   handleClickShowPasssword()
   {
@@ -104,6 +120,39 @@ class App extends Component {
   handleMouseDownPassword(e)
   {
     e.preventDefault();
+  }
+  savePassphrase(e)
+  {
+    const saved = this.state.passphrase;
+    this.setState({ savedPassphrase: saved });
+    this.planLock()
+  }
+  planLock() {
+    addIdleEvent(() => this.lock(), 6*1000);
+  }
+  lock() {
+    this.setState({
+      locked: true,
+      passphrase: null
+    });
+  }
+  unlock(key) {
+    if(key)
+    {
+      const p = this.state.savedPassphrase;
+      this.setState({
+        locked: false,
+        passphrase: p,
+        keyPassphrase: ''
+      });
+      this.planLock()
+    }
+  }
+  unsavePassphrase(e) {
+    //remove from storage
+    // ...
+    this.setState({ passphrase: '' });
+    this.setState({ savedPassphrase: null });
   }
   renderIdenticon() {
     if(!this.state.passphrase)
@@ -147,8 +196,48 @@ class App extends Component {
   }
   render() {
     const { classes } = this.props;
+    if(this.state.locked) {
+      return <div>
+      <FormControl
+        className={classes.passphraseFormControl}>
+        <InputLabel htmlFor="unlock_passphrase">
+          {__('Last word of your passphrase')}
+        </InputLabel>
+        <Input
+          inputProps={{tabIndex:1}}
+          id="unlock_passphrase"
+          onChange={this.updateKeyPassphrase.bind(this)}
+          type={this.state.showKeyPassword ? 'text' : "password"}
+          value={this.state.keyPassphrase}
+          endAdornment={
+            <InputAdornment position="end">
+              <IconButton
+                onClick={this.handleClickShowKeyPasssword.bind(this)}
+                onMouseDown={this.handleMouseDownKeyPassword.bind(this)}
+              >
+                {this.state.showKeyPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          }
+        />
+        </FormControl>
+        <Button
+          disabled={this.props.keyPassphrase == false}
+          raised color="primary"
+          className={classes.button}
+          onClick={this.unlock.bind(this)} >
+          {__('Unlock')}
+        </Button>
+      </div>
+    }
     return (
-      <div>
+      <div>{this.state.savedPassphrase ?
+        [
+          <div>The passphrase is saved.</div>,
+          <div className="unsavePassphrase" onClick={this.unsavePassphrase.bind(this)}>delete</div>
+        ]
+      :
+        <div>
           <FormControl
             className={classes.passphraseFormControl}>
             <InputLabel htmlFor="passphrase">
@@ -171,8 +260,11 @@ class App extends Component {
                 </InputAdornment>
               }
             />
-          </FormControl>
-          {this.renderIdenticon()}
+            </FormControl>
+            {this.renderIdenticon()}
+            <div className="savePassphrase" onClick={this.savePassphrase.bind(this)}>save</div>
+          </div>
+        }
           <br/>
           <span style={{fontSize:'40px'}}><AddIcon /> </span>
           <FormControl
