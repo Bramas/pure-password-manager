@@ -16,7 +16,8 @@ import Identicon from 'identicon.js';
 import parse from 'url-parse';
 import shajs from 'sha.js';
 
-import {addIdleEvent} from './utils';
+import {store as storePassphrase, remove as removePassphrase, load as loadPassphrase} from './passphraseStorage';
+import {addIdleEvent, removeIdleEvent} from './utils';
 import __ from './locale';
 
 const styles = theme => ({
@@ -88,6 +89,7 @@ class App extends Component {
     }
     this.state = {
       passphrase: '',
+      keyPassphrase: '',
       salt: app
     }
   }
@@ -97,7 +99,8 @@ class App extends Component {
     }
   }
   updateKeyPassphrase(e) {
-    this.setState({keyPassphrase: e.target.value});
+
+    this.setState({keyPassphrase: e.target.value,   wrongKeyPassphrase: false});
   }
   updatePassphrase(e) {
     this.setState({passphrase: e.target.value});
@@ -123,12 +126,12 @@ class App extends Component {
   }
   savePassphrase(e)
   {
-    const saved = this.state.passphrase;
+    const saved = storePassphrase(this.state.passphrase);
     this.setState({ savedPassphrase: saved });
     this.planLock()
   }
   planLock() {
-    addIdleEvent(() => this.lock(), 6*1000);
+    this.removeIdleEvent = addIdleEvent(this.lock.bind(this), 2*1000);
   }
   lock() {
     this.setState({
@@ -136,10 +139,17 @@ class App extends Component {
       passphrase: null
     });
   }
-  unlock(key) {
-    if(key)
+  unlock(e) {
+
+    if(this.state.keyPassphrase)
     {
-      const p = this.state.savedPassphrase;
+      const p = loadPassphrase(this.state.keyPassphrase);//this.state.savedPassphrase;
+      if(!p) {
+        this.setState({
+          wrongKeyPassphrase: true
+        });
+        return;
+      }
       this.setState({
         locked: false,
         passphrase: p,
@@ -150,7 +160,8 @@ class App extends Component {
   }
   unsavePassphrase(e) {
     //remove from storage
-    // ...
+    if(this.removeIdleEvent) this.removeIdleEvent();
+    removePassphrase();
     this.setState({ passphrase: '' });
     this.setState({ savedPassphrase: null });
   }
@@ -204,6 +215,7 @@ class App extends Component {
           {__('Last word of your passphrase')}
         </InputLabel>
         <Input
+          error={this.state.wrongKeyPassphrase}
           inputProps={{tabIndex:1}}
           id="unlock_passphrase"
           onChange={this.updateKeyPassphrase.bind(this)}
@@ -232,10 +244,10 @@ class App extends Component {
     }
     return (
       <div>{this.state.savedPassphrase ?
-        [
+        <div>
           <div>The passphrase is saved.</div>,
           <div className="unsavePassphrase" onClick={this.unsavePassphrase.bind(this)}>delete</div>
-        ]
+        </div>
       :
         <div>
           <FormControl

@@ -1,31 +1,47 @@
 
 // Nodejs encryption with CTR
-const crypto = require('crypto');
-const algorithm = 'aes-256-ctr';
+const CryptoJS = require("crypto-js");
+
 
 function encrypt(text){
   const key = text.split(' ').slice(-1)[0]
-  const hashedKey = crypto.createHash('sha256').update(key).digest();
-  const iv = crypto.randomBytes(16)
-  var cipher = crypto.createCipheriv(algorithm, hashedKey, iv)
-  var crypted = cipher.update(text,'utf8','hex')
-  crypted += cipher.final('hex');
-  return {text: crypted, iv};
+  const hashedKey = CryptoJS.SHA256(key).toString(CryptoJS.enc.Base64);
+  var array = new Uint32Array(4);
+
+  var crypted = CryptoJS.AES.encrypt(text, hashedKey);
+
+  crypted = {
+      ciphertext:crypted.ciphertext,
+      salt:crypted.salt,
+      iv:crypted.iv,
+    }
+  crypted = JSON.stringify(crypted);
+
+  return crypted
 }
 
-function decrypt({text, iv}, key){
-  const hashedKey = crypto.createHash('sha256').update(key).digest();
-  var decipher = crypto.createDecipheriv(algorithm, hashedKey, iv)
-  var dec = decipher.update(text,'hex','utf8')
-  dec += decipher.final('utf8');
-  return dec;
+function decrypt(data, key){
+  const hashedKey = CryptoJS.SHA256(key).toString(CryptoJS.enc.Base64);
+
+  return CryptoJS.AES.decrypt(JSON.parse(data),
+    hashedKey).toString(CryptoJS.enc.Utf8);
 }
 
 
-
-function store(passphrase) {
-  data = encrypt(passphrase)
+export function store(passphrase) {
+  let data = encrypt(passphrase)
+  console.log('store', data)
   localStorage.setItem("passphrase", data);
+  return true;
 }
-
-store("hello world")
+export function load(key) {
+  const data = localStorage.getItem("passphrase", data);
+  console.log('load', data)
+  if(!data) {
+    return false;
+  }
+  return decrypt(data, key);
+}
+export function remove() {
+  const data = localStorage.setItem("passphrase", null);
+}

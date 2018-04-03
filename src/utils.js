@@ -29,4 +29,11 @@ export const addIdleEvent = (cb, idleTimeout) => {
         }, idleTimeout)
         // 1000 milisec = 1 sec
     }
+    resetTimer()
+    return () => {
+      clearTimeout(t);
+      idleEventListeners.forEach((e) =>
+        window.removeEventListener(e, resetTimer, true)
+      );
+    };
 };
