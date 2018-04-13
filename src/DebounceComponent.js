@@ -30,12 +30,14 @@ export default (options) => (DecoratedComponent) => {
         return;
       }
       this.setState({working: false});
+      if(this.props.onStateChanged) this.props.onStateChanged('ready');
       if(this.props.onChange) this.props.onChange(result);
       this.setState({result});
       this.forceUpdate();
     }
     onError(error, values) {
       this.setState({working: false});
+      if(this.props.onStateChanged) this.props.onStateChanged('ready');
       if(this.props.onError)
         this.props.onError(error, values);
       else
@@ -51,6 +53,7 @@ export default (options) => (DecoratedComponent) => {
       });
       if(!this.state.working) {
         this.setState({working: true});
+        if(this.props.onStateChanged) this.props.onStateChanged('working');
         this.forceUpdate();
       }
       options.compute(values)

@@ -16,7 +16,7 @@ import Identicon from 'identicon.js';
 import parse from 'url-parse';
 import shajs from 'sha.js';
 
-import {store as storePassphrase, remove as removePassphrase, load as loadPassphrase} from './passphraseStorage';
+import {exists as passphraseExists, store as storePassphrase, remove as removePassphrase, load as loadPassphrase} from './passphraseStorage';
 import {addIdleEvent, removeIdleEvent} from './utils';
 import __ from './locale';
 
@@ -92,6 +92,11 @@ class App extends Component {
       keyPassphrase: '',
       salt: app
     }
+    if(passphraseExists())
+    {
+      this.state.locked = true;
+      this.state.savedPassphrase = true;
+    }
   }
   componentWillMount() {
     if(this.props.defaultSalt) {
@@ -127,11 +132,11 @@ class App extends Component {
   savePassphrase(e)
   {
     const saved = storePassphrase(this.state.passphrase);
-    this.setState({ savedPassphrase: saved });
+    this.setState({ savedPassphrase: true });
     this.planLock()
   }
   planLock() {
-    this.removeIdleEvent = addIdleEvent(this.lock.bind(this), 2*1000);
+    this.removeIdleEvent = addIdleEvent(this.lock.bind(this), 10*1000);
   }
   lock() {
     this.setState({
@@ -163,7 +168,7 @@ class App extends Component {
     if(this.removeIdleEvent) this.removeIdleEvent();
     removePassphrase();
     this.setState({ passphrase: '' });
-    this.setState({ savedPassphrase: null });
+    this.setState({ savedPassphrase: false });
   }
   renderIdenticon() {
     if(!this.state.passphrase)
@@ -219,6 +224,7 @@ class App extends Component {
           inputProps={{tabIndex:1}}
           id="unlock_passphrase"
           onChange={this.updateKeyPassphrase.bind(this)}
+          onKeyUp={(e) => {if(e.keyCode == 13) this.unlock()}}
           type={this.state.showKeyPassword ? 'text' : "password"}
           value={this.state.keyPassphrase}
           endAdornment={
@@ -249,7 +255,7 @@ class App extends Component {
           <div className="unsavePassphrase" onClick={this.unsavePassphrase.bind(this)}>delete</div>
         </div>
       :
-        <div>
+        <div style={{position: 'relative'}}>
           <FormControl
             className={classes.passphraseFormControl}>
             <InputLabel htmlFor="passphrase">
@@ -274,7 +280,7 @@ class App extends Component {
             />
             </FormControl>
             {this.renderIdenticon()}
-            <div className="savePassphrase" onClick={this.savePassphrase.bind(this)}>save</div>
+            <div style={{position: 'absolute', right: 0, width: 60, textAlign: 'center'}} className="savePassphrase" onClick={this.savePassphrase.bind(this)}>save</div>
           </div>
         }
           <br/>
@@ -297,6 +303,13 @@ class App extends Component {
             application={this.state.salt}
             passphrase={this.state.passphrase}
             actionButton={this.props.actionButton}
+            onStateChanged={(e)=> {
+              if(e == 'ready' && this.state.savedPassphrase) {
+                this.planLock();
+              } else {
+                if(this.removeIdleEvent) this.removeIdleEvent();
+              }
+            }}
           />
       </div>
     );

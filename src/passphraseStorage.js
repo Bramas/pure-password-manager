@@ -27,6 +27,9 @@ function decrypt(data, key){
     hashedKey).toString(CryptoJS.enc.Utf8);
 }
 
+export function exists() {
+  return !!localStorage.getItem("passphrase");
+}
 
 export function store(passphrase) {
   let data = encrypt(passphrase)
@@ -40,8 +43,9 @@ export function load(key) {
   if(!data) {
     return false;
   }
+  console.log(key, data)
   return decrypt(data, key);
 }
 export function remove() {
-  const data = localStorage.setItem("passphrase", null);
+  const data = localStorage.removeItem("passphrase");
 }

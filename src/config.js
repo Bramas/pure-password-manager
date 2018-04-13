@@ -28,32 +28,69 @@ export default {
     N: 16384,
     r: 8,
     p: 1,
-    dkLen: 16,
+    dkLen: 20,
     encoding: 'hex',
     interruptStep : 100
   },
   scryptFormatHashSaltPrefix : 'pure-formatHash-salt|',
 
   //ropsten testnet contract address
-  contractAddress: "0xb4f57264d1145d26524D147A0ae6FF7A9E124E29",
+  //contractAddress: "0xb4f57264d1145d26524D147A0ae6FF7A9E124E29",
+  contractAddress: "0x436d55189270A1ef7948f64615dfcA119a9331bB",
   contractABI: [
   	{
-  		"constant": true,
+  		"constant": false,
   		"inputs": [
   			{
-  				"name": "",
-  				"type": "bytes16"
-  			}
-  		],
-  		"name": "passwordFormat",
-  		"outputs": [
+  				"name": "passwordHash",
+  				"type": "bytes20"
+  			},
   			{
-  				"name": "",
+  				"name": "format",
   				"type": "bytes32"
   			}
   		],
+  		"name": "addPasswordFormat",
+  		"outputs": [],
+  		"payable": true,
+  		"stateMutability": "payable",
+  		"type": "function"
+  	},
+  	{
+  		"anonymous": false,
+  		"inputs": [
+  			{
+  				"indexed": true,
+  				"name": "from",
+  				"type": "address"
+  			},
+  			{
+  				"indexed": false,
+  				"name": "value",
+  				"type": "uint256"
+  			}
+  		],
+  		"name": "Deposit",
+  		"type": "event"
+  	},
+  	{
+  		"payable": true,
+  		"stateMutability": "payable",
+  		"type": "fallback"
+  	},
+  	{
+  		"inputs": [],
   		"payable": false,
-  		"stateMutability": "view",
+  		"stateMutability": "nonpayable",
+  		"type": "constructor"
+  	},
+  	{
+  		"constant": false,
+  		"inputs": [],
+  		"name": "withdraw",
+  		"outputs": [],
+  		"payable": false,
+  		"stateMutability": "nonpayable",
   		"type": "function"
   	},
   	{
@@ -71,53 +108,23 @@ export default {
   		"type": "function"
   	},
   	{
-  		"anonymous": false,
+  		"constant": true,
   		"inputs": [
   			{
-  				"indexed": true,
-  				"name": "_from",
-  				"type": "address"
-  			},
-  			{
-  				"indexed": false,
-  				"name": "_value",
-  				"type": "uint256"
+  				"name": "",
+  				"type": "bytes20"
   			}
   		],
-  		"name": "Deposit",
-  		"type": "event"
-  	},
-  	{
-  		"constant": false,
-  		"inputs": [
+  		"name": "passwordFormat",
+  		"outputs": [
   			{
-  				"name": "passwordHash",
-  				"type": "bytes16"
-  			},
-  			{
-  				"name": "format",
+  				"name": "",
   				"type": "bytes32"
   			}
   		],
-  		"name": "addPasswordFormat",
-  		"outputs": [],
-  		"payable": true,
-  		"stateMutability": "payable",
-  		"type": "function"
-  	},
-  	{
-  		"constant": false,
-  		"inputs": [],
-  		"name": "withdraw",
-  		"outputs": [],
   		"payable": false,
-  		"stateMutability": "nonpayable",
+  		"stateMutability": "view",
   		"type": "function"
-  	},
-  	{
-  		"payable": true,
-  		"stateMutability": "payable",
-  		"type": "fallback"
   	}
   ]
 }
