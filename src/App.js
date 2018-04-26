@@ -251,8 +251,9 @@ class App extends Component {
     return (
       <div>{this.state.savedPassphrase ?
         <div>
-          <div>The passphrase is saved.</div>,
-          <div className="unsavePassphrase" onClick={this.unsavePassphrase.bind(this)}>delete</div>
+          <div>The passphrase is saved.
+            <Button className="unsavePassphrase" onClick={this.unsavePassphrase.bind(this)} color="primary">delete</Button>
+          </div>
         </div>
       :
         <div style={{position: 'relative'}}>
@@ -280,7 +281,7 @@ class App extends Component {
             />
             </FormControl>
             {this.renderIdenticon()}
-            <div style={{position: 'absolute', right: 0, width: 60, textAlign: 'center'}} className="savePassphrase" onClick={this.savePassphrase.bind(this)}>save</div>
+            <Button style={{position: 'absolute', bottom: -36, left:40, width: 60, textAlign: 'center'}} className="savePassphrase" onClick={this.savePassphrase.bind(this)}>save</Button>
           </div>
         }
           <br/>
