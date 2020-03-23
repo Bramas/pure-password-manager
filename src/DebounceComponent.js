@@ -81,7 +81,7 @@ export default (options) => (DecoratedComponent) => {
         this.handleTimeout.bind(this, values),
         options.delay);
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
       if(!this.valuesEquals(nextProps))
       {
         this.planUpdate(nextProps);

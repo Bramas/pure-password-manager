@@ -2,22 +2,22 @@ import React, { Component } from 'react';
 import './App.css';
 import PropTypes from 'prop-types';
 import Derive from './Derive';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl } from 'material-ui/Form';
-import IconButton from 'material-ui/IconButton';
-import Button from 'material-ui/Button';
-import Visibility from 'material-ui-icons/Visibility';
-import VisibilityOff from 'material-ui-icons/VisibilityOff';
-import AddIcon from 'material-ui-icons/Add';
+import { withStyles } from '@material-ui/core';
+import Input from '@material-ui/core/Input';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import AddIcon from '@material-ui/icons/Add';
 import Identicon from 'identicon.js';
 import parse from 'url-parse';
 import shajs from 'sha.js';
 
 import {exists as passphraseExists, store as storePassphrase, remove as removePassphrase, load as loadPassphrase} from './passphraseStorage';
-import {addIdleEvent, removeIdleEvent} from './utils';
+import {addIdleEvent} from './utils';
 import __ from './locale';
 
 const styles = theme => ({
@@ -98,7 +98,7 @@ class App extends Component {
       this.state.savedPassphrase = true;
     }
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if(this.props.defaultSalt) {
       this.setState({salt: this.props.defaultSalt});
     }
@@ -132,7 +132,7 @@ class App extends Component {
   savePassphrase(e)
   {
     const saved = storePassphrase(this.state.passphrase);
-    this.setState({ savedPassphrase: true });
+    this.setState({ savedPassphrase: saved });
     this.planLock()
   }
   planLock() {
@@ -224,7 +224,7 @@ class App extends Component {
           inputProps={{tabIndex:1}}
           id="unlock_passphrase"
           onChange={this.updateKeyPassphrase.bind(this)}
-          onKeyUp={(e) => {if(e.keyCode == 13) this.unlock()}}
+          onKeyUp={(e) => {if(e.keyCode === 13) this.unlock()}}
           type={this.state.showKeyPassword ? 'text' : "password"}
           value={this.state.keyPassphrase}
           endAdornment={
@@ -240,7 +240,7 @@ class App extends Component {
         />
         </FormControl>
         <Button
-          disabled={this.props.keyPassphrase == false}
+          disabled={this.props.keyPassphrase === false}
           raised color="primary"
           className={classes.button}
           onClick={this.unlock.bind(this)} >
@@ -305,7 +305,7 @@ class App extends Component {
             passphrase={this.state.passphrase}
             actionButton={this.props.actionButton}
             onStateChanged={(e)=> {
-              if(e == 'ready' && this.state.savedPassphrase) {
+              if(e === 'ready' && this.state.savedPassphrase) {
                 this.planLock();
               } else {
                 if(this.removeIdleEvent) this.removeIdleEvent();

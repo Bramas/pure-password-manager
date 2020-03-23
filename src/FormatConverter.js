@@ -110,13 +110,14 @@ function getBestBlockSize(randomRange, maximumBlockSize){
   if(blockSize < 1) {
     blockSize = 1;
   }
+
   if(power_of_2(randomRange))
   {
     const l = Math.round(Math.log2(randomRange));
     if(l>= 1 && l < blockSize)
-      return l;
+      blockSize = l;
   }
-  return blockSize;
+  return Math.min(52, blockSize); // in JS integer are safe untill 2^53 - 1
 }
 /**
 * swap characters in a string
@@ -179,6 +180,7 @@ FormatConverter.prototype.saltWithNonce = function(keyHex)
 FormatConverter.prototype.randomStringFromKey =
   function(keyHex)
 {
+  console.log('randomStringFromKey keyHex', keyHex)
   if(!keyHex) {
     throw new Error('The key is null, undefined or empty');
   }
@@ -217,7 +219,9 @@ FormatConverter.prototype.randomStringFromKey =
     }
     lastValue = value;
     str.push(charset[value]);
+    
   }
+  console.log('randomStringFromKey str.join', str.join(''))
   return this.options.startsWith + str.join('');
 }
 

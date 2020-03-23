@@ -1,30 +1,32 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Typography from 'material-ui/Typography';
-import TextField from 'material-ui/TextField';
-import { withStyles } from 'material-ui/styles';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import Visibility from 'material-ui-icons/Visibility';
-import VisibilityOff from 'material-ui-icons/VisibilityOff';
-import ContentCopy  from 'material-ui-icons/ContentCopy';
-import {CopyToClipboard} from 'react-copy-to-clipboard';
-import { FormControlLabel, FormControl } from 'material-ui/Form';
-import { CircularProgress } from 'material-ui/Progress';
-import Checkbox from 'material-ui/Checkbox';
-import IconButton from 'material-ui/IconButton';
-import Button from 'material-ui/Button';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import { withStyles } from '@material-ui/core';
+import Input from '@material-ui/core/Input';
+
+import InputAdornment from '@material-ui/core/InputAdornment';
+import InputLabel from '@material-ui/core/InputLabel';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Checkbox from '@material-ui/core/Checkbox';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 import scrypt from 'scrypt-async';
 import config from './config';
 import __ from './locale';
 import Eth from './ethereum';
 import DebounceComponent from './DebounceComponent';
 import FormatConverter, {CharacterClass} from './FormatConverter';
-import blueGrey from 'material-ui/colors/blueGrey';
+import blueGrey from '@material-ui/core/colors/blueGrey';
 import Slider from 'rc-slider';
-import ShuffleIcon from 'material-ui-icons/Shuffle';
-import TuneIcon from 'material-ui-icons/Tune';
-import ForwardIcon from 'material-ui-icons/Forward';
-import DoneIcon from 'material-ui-icons/Done';
+import ShuffleIcon from '@material-ui/icons/Shuffle';
+import TuneIcon from '@material-ui/icons/Tune';
+import ForwardIcon from '@material-ui/icons/Forward';
+import DoneIcon from '@material-ui/icons/Done';
 import 'rc-slider/assets/index.css';
 
 const defaultState = {
@@ -57,10 +59,10 @@ class Format extends Component {
       }
     );
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     Eth.init();
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if(nextProps.passwordHash !== this.props.passwordHash) {
       this.changeFormat(defaultState);
     }
@@ -142,9 +144,9 @@ class Format extends Component {
             <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>
               {__('smart contract')}
             </a>
-            {__(' with this format so that every time you \
-              enter your passphrase with this website, the \
-              given format will be used.')}
+            {__(` with this format so that every time you 
+              enter your passphrase with this website, the 
+              given format will be used.`)}
         </Typography>
       </span>
       : (Eth.isMetaMask() ?
@@ -157,13 +159,13 @@ class Format extends Component {
         :
         <span><br/>
           <Typography type='caption'>
-            {__("If you change the format, you'll have to remember it for the next \
-            time you have to enter this password. To avoid this, you can \
-            save it to the ethereum blockchain (beta feature). To do so \
-            you can install ")}
+            {__(`If you change the format, you'll have to remember it for the next 
+            time you have to enter this password. To avoid this, you can 
+            save it to the ethereum blockchain (beta feature). To do so 
+            you can install `)}
             <a href="https://metamask.io/">MetaMask</a>
-              {__(" to be able to do it automatically \
-                or call ")}
+              {__(` to be able to do it automatically 
+                or call `)}
             <a href={"https://"+config.etherNetwork+".etherscan.io/address/"+config.contractAddress}>
               {__('this contract')}
             </a>

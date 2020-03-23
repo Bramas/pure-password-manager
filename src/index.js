@@ -5,17 +5,18 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-import Button from 'material-ui/Button';
-import ContentCopy  from 'material-ui-icons/ContentCopy';
+import Button from '@material-ui/core/Button';
+import ContentCopy  from '@material-ui/icons/FileCopy';
 import __ from './locale';
-import DoneIcon from 'material-ui-icons/Done';
-import Paper from 'material-ui/Paper';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import DoneIcon from '@material-ui/icons/Done';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core';
 
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
-import blueGrey from 'material-ui/colors/blueGrey';
-import deepPurple from 'material-ui/colors/deepPurple';
+import { createMuiTheme } from '@material-ui/core';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import blueGrey from '@material-ui/core/colors/blueGrey';
+import deepPurple from '@material-ui/core/colors/deepPurple';
 
 const theme = createMuiTheme({
   palette: {
@@ -78,6 +79,7 @@ const paperStyle={
     width: '450px',
     color: theme.palette.text.secondary,
   }
+
 
 ReactDOM.render(
   <MuiThemeProvider theme={theme}>

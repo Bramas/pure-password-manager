@@ -6,7 +6,6 @@ const CryptoJS = require("crypto-js");
 function encrypt(text){
   const key = text.split(' ').slice(-1)[0]
   const hashedKey = CryptoJS.SHA256(key).toString(CryptoJS.enc.Base64);
-  var array = new Uint32Array(4);
 
   var crypted = CryptoJS.AES.encrypt(text, hashedKey);
 
@@ -38,7 +37,7 @@ export function store(passphrase) {
   return true;
 }
 export function load(key) {
-  const data = localStorage.getItem("passphrase", data);
+  const data = localStorage.getItem("passphrase");
   console.log('load', data)
   if(!data) {
     return false;
@@ -47,5 +46,5 @@ export function load(key) {
   return decrypt(data, key);
 }
 export function remove() {
-  const data = localStorage.removeItem("passphrase");
+  localStorage.removeItem("passphrase");
 }
